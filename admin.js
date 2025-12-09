@@ -232,13 +232,13 @@ function generateRandomBracket(id) {
         const t = snapshot.val();
         if (!t.participants) return alert("No participants!");
         
-        const teams = [];
+        let teams = [];
         Object.entries(t.participants).forEach(([k, v]) => {
             if(t.fee > 0 && v.status !== 'approved') return;
             teams.push(k);
         });
 
-        if (teams.length < 2) return alert("Need 2 approved teams min.");
+        if (teams.length < 2) return alert("Need at least 2 teams.");
 
         for (let i = teams.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -246,49 +246,79 @@ function generateRandomBracket(id) {
         }
 
         const bracketData = {};
+        const N = teams.length;
+        const P = Math.pow(2, Math.ceil(Math.log2(N)));
+        
+        const prelimCount = N - (P/2); 
+        const byeCount = P - N; 
+
+        let prelimMatches = [];
+        let nextRoundPool = [];
         let matchIdCounter = 1;
 
-        const round1Matches = [];
-        for (let i = 0; i < teams.length; i += 2) {
-            const teamA = teams[i];
-            const teamB = teams[i+1] || null;
-
-            round1Matches.push({
-                id: matchIdCounter++,
-                teamA: teamA,
-                teamB: teamB,
-                winner: teamB ? null : teamA, 
-                scoreA: 0,
-                scoreB: 0,
-                format: 1, 
-                nextMatchId: null
+        for (let i = 0; i < prelimCount * 2; i += 2) {
+            prelimMatches.push({
+                id: `r1_m${matchIdCounter++}`,
+                teamA: teams[i],
+                teamB: teams[i+1],
+                scoreA: 0, scoreB: 0, format: 1, completed: false, winner: null
             });
+            nextRoundPool.push({ type: 'match_winner', sourceMatchIndex: prelimMatches.length - 1, sourceRound: 'r1' });
         }
-        bracketData['round1'] = round1Matches;
+        
+        for (let i = prelimCount * 2; i < N; i++) {
+            nextRoundPool.push({ type: 'bye', teamName: teams[i] });
+        }
 
-        let currentRoundMatches = round1Matches;
+        if(prelimMatches.length > 0) bracketData['r1'] = prelimMatches;
+
+        let currentRoundPool = nextRoundPool;
         let roundCounter = 2;
+        let bronzeMatchCreated = false;
 
-        while (currentRoundMatches.length > 1) {
-            const nextRoundMatches = [];
-            for (let i = 0; i < currentRoundMatches.length; i += 2) {
-                const nextId = matchIdCounter++;
-                currentRoundMatches[i].nextMatchId = nextId;
-                if (currentRoundMatches[i+1]) currentRoundMatches[i+1].nextMatchId = nextId;
+        while (currentRoundPool.length > 1) {
+            let nextPool = [];
+            let currentMatches = [];
+            let isSemiFinal = currentRoundPool.length === 4;
+            
+            for (let i = 0; i < currentRoundPool.length; i += 2) {
+                const itemA = currentRoundPool[i];
+                const itemB = currentRoundPool[i+1];
+                
+                const matchId = `r${roundCounter}_m${(i/2)+1}`;
+                
+                let matchObj = {
+                    id: matchId,
+                    teamA: itemA.type === 'bye' ? itemA.teamName : null,
+                    teamB: itemB.type === 'bye' ? itemB.teamName : null,
+                    scoreA: 0, scoreB: 0, format: isSemiFinal ? 3 : (currentRoundPool.length === 2 ? 5 : 1), 
+                    completed: false, winner: null
+                };
+                
+                if (itemA.type === 'match_winner') {
+                    bracketData[itemA.sourceRound][itemA.sourceMatchIndex].nextMatchId = matchId;
+                }
+                if (itemB.type === 'match_winner') {
+                    bracketData[itemB.sourceRound][itemB.sourceMatchIndex].nextMatchId = matchId;
+                }
 
-                nextRoundMatches.push({
-                    id: nextId,
-                    teamA: null,
-                    teamB: null,
-                    winner: null,
-                    scoreA: 0, 
-                    scoreB: 0,
-                    format: 1,
-                    nextMatchId: null
-                });
+                currentMatches.push(matchObj);
+                nextPool.push({ type: 'match_winner', sourceMatchIndex: currentMatches.length - 1, sourceRound: `r${roundCounter}` });
             }
-            bracketData[`round${roundCounter}`] = nextRoundMatches;
-            currentRoundMatches = nextRoundMatches;
+
+            bracketData[`r${roundCounter}`] = currentMatches;
+            currentRoundPool = nextPool;
+            
+            if (isSemiFinal) {
+                bracketData['bronze'] = [{
+                    id: 'bronze',
+                    teamA: null, teamB: null, scoreA: 0, scoreB: 0, format: 3, completed: false, winner: null
+                }];
+                
+                bracketData[`r${roundCounter}`][0].bronzeMatchId = 'bronze';
+                bracketData[`r${roundCounter}`][1].bronzeMatchId = 'bronze';
+            }
+
             roundCounter++;
         }
 
@@ -301,21 +331,32 @@ function generateRandomBracket(id) {
 
 function renderAdminBracket(id, t) {
     const container = document.getElementById('admin-bracket-view');
-    const roundKeys = Object.keys(t.bracket).sort((a,b) => b.localeCompare(a)).reverse();
+    const sortedKeys = Object.keys(t.bracket).sort((a,b) => {
+        if(a === 'bronze') return 1;
+        if(b === 'bronze') return -1;
+        const numA = parseInt(a.replace('r', ''));
+        const numB = parseInt(b.replace('r', ''));
+        return numA - numB;
+    });
     
     let html = '<div style="display:flex; gap:30px; overflow-x:auto; padding-bottom:10px;">';
     
-    roundKeys.forEach(rKey => {
-        html += `<div class="round-column" style="min-width:200px;"><div style="text-align:center; color:var(--neon-purple); font-weight:bold; margin-bottom:10px;">${rKey.toUpperCase()}</div>`;
+    sortedKeys.forEach(rKey => {
+        let title = rKey.toUpperCase();
+        if(rKey === 'bronze') title = "BRONZE MATCH";
+        else if (t.bracket[rKey].length === 1 && rKey !== 'r1') title = "GRAND FINAL"; 
+        
+        html += `<div class="round-column" style="min-width:200px;"><div style="text-align:center; color:var(--neon-purple); font-weight:bold; margin-bottom:10px;">${title}</div>`;
         t.bracket[rKey].forEach((m, idx) => {
             const wA = m.winner === m.teamA && m.teamA;
             const wB = m.winner === m.teamB && m.teamB;
+            const borderStyle = m.completed ? '2px solid var(--success)' : (m.teamA && m.teamB ? '1px solid var(--neon-blue)' : '1px solid #333');
             
             html += `
-                <div class="match-card" onclick="openScoreModal('${rKey}', ${idx}, '${m.teamA}', '${m.teamB}', ${m.scoreA}, ${m.scoreB}, ${m.format || 1})" style="cursor:pointer; border:${(m.teamA && m.teamB) ? '1px solid var(--neon-blue)' : '1px solid #333'}">
+                <div class="match-card" onclick="openScoreModal('${rKey}', ${idx}, '${m.teamA}', '${m.teamB}', ${m.scoreA}, ${m.scoreB}, ${m.format || 1}, ${m.completed})" style="cursor:pointer; border:${borderStyle}; opacity:${m.completed?0.6:1}">
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <small style="color:#aaa;">M${m.id} <span style="background:#444; padding:1px 4px; border-radius:3px;">BO${m.format||1}</span></small>
-                        <small style="color:var(--text-muted);">Edit</small>
+                        <small style="color:#aaa;">${m.id} <span style="background:#444; padding:1px 4px; border-radius:3px;">BO${m.format||1}</span></small>
+                        <small style="color:var(--text-muted);">${m.completed ? 'DONE' : 'Edit'}</small>
                     </div>
                     <div class="match-team ${wA ? 'winner' : ''}" style="display:flex; justify-content:space-between;">
                         <span>${m.teamA || '...'}</span> <span>${m.scoreA}</span>
@@ -332,15 +373,18 @@ function renderAdminBracket(id, t) {
     container.innerHTML = html;
 }
 
-function openScoreModal(roundKey, index, teamA, teamB, sA, sB, fmt) {
-    if (!teamA || !teamB || teamA === 'null' || teamB === 'null' || teamA === '...' || teamB === '...') {
-        alert("Match not ready (Waiting for teams)");
+function openScoreModal(roundKey, index, teamA, teamB, sA, sB, fmt, isCompleted) {
+    if (!teamA || !teamB || teamA === 'null' || teamB === 'null') {
+        alert("Match not ready");
         return;
+    }
+    if (isCompleted) {
+        if(!confirm("Match is DONE. Edit anyway?")) return;
     }
 
     currentEditingMatch = { roundKey, index, teamA, teamB };
     
-    document.getElementById('score-modal-match-info').innerText = `${roundKey.toUpperCase()} - Match`;
+    document.getElementById('score-modal-match-info').innerText = `${roundKey.toUpperCase()}`;
     document.getElementById('score-team-a-name').innerText = teamA;
     document.getElementById('score-team-b-name').innerText = teamB;
     document.getElementById('input-score-a').value = sA;
@@ -355,7 +399,7 @@ function closeScoreModal() {
     currentEditingMatch = null;
 }
 
-function saveMatchScore() {
+function saveMatchScore(markDone) {
     if (!currentEditingMatch) return;
 
     const sA = parseInt(document.getElementById('input-score-a').value) || 0;
@@ -363,11 +407,16 @@ function saveMatchScore() {
     const fmt = parseInt(document.getElementById('modalMatchFormat').value) || 1;
     
     const { roundKey, index, teamA, teamB } = currentEditingMatch;
-    const winsNeeded = Math.ceil(fmt / 2);
-
+    
     let winner = null;
-    if (sA >= winsNeeded) winner = teamA;
-    else if (sB >= winsNeeded) winner = teamB;
+    let loser = null;
+    
+    if (sA > sB) { winner = teamA; loser = teamB; }
+    else if (sB > sA) { winner = teamB; loser = teamA; }
+    else if (markDone) {
+        alert("Draw!");
+        return;
+    }
 
     const updates = {};
     const basePath = `tournaments/${currentTournamentId}/bracket/${roundKey}/${index}`;
@@ -375,44 +424,84 @@ function saveMatchScore() {
     updates[`${basePath}/scoreA`] = sA;
     updates[`${basePath}/scoreB`] = sB;
     updates[`${basePath}/format`] = fmt;
-    updates[`${basePath}/winner`] = winner; 
+    
+    if (markDone) {
+        updates[`${basePath}/completed`] = true;
+        updates[`${basePath}/winner`] = winner;
+    }
 
     database.ref().update(updates).then(() => {
-        if (winner) {
-            advanceWinner(currentTournamentId, roundKey, index, winner);
+        if (markDone && winner) {
+            advanceWinner(currentTournamentId, roundKey, index, winner, loser);
         }
         closeScoreModal();
     });
 }
 
-function advanceWinner(tourId, roundKey, matchIndex, winnerName) {
+function advanceWinner(tourId, roundKey, matchIndex, winnerName, loserName) {
     database.ref(`tournaments/${tourId}/bracket/${roundKey}/${matchIndex}`).once('value', snap => {
         const match = snap.val();
-        if (!match.nextMatchId) return;
 
-        database.ref(`tournaments/${tourId}/bracket`).once('value', bracketSnap => {
-            const brackets = bracketSnap.val();
-            let targetRound, targetIndex;
+        // Handle Winner
+        if (match.nextMatchId) {
+            findAndSet(tourId, match.nextMatchId, winnerName);
+        } else if (roundKey !== 'bronze') {
+             // Grand Final Winner
+             alert(`WINNER: ${winnerName}`);
+             updateLeaderboardPoints(winnerName, 1, currentTournamentData.fee > 0);
+             updateLeaderboardPoints(loserName, 2, currentTournamentData.fee > 0);
+        } else {
+             // Bronze Winner
+             alert(`3rd PLACE: ${winnerName}`);
+             updateLeaderboardPoints(winnerName, 3, currentTournamentData.fee > 0);
+        }
 
-            Object.keys(brackets).forEach(r => {
-                brackets[r].forEach((m, i) => {
-                    if (m.id == match.nextMatchId) {
-                        targetRound = r;
-                        targetIndex = i;
-                    }
-                });
-            });
+        // Handle Loser (Bronze)
+        if (match.bronzeMatchId) {
+            findAndSet(tourId, match.bronzeMatchId, loserName);
+        }
+    });
+}
 
-            if (targetRound) {
-                let updateField = null;
-                if (matchIndex % 2 === 0) updateField = 'teamA';
-                else updateField = 'teamB';
+function findAndSet(tourId, targetMatchId, teamName) {
+    database.ref(`tournaments/${tourId}/bracket`).once('value', bracketSnap => {
+        const brackets = bracketSnap.val();
+        let targetRound, targetIndex;
 
-                if (updateField) {
-                    database.ref(`tournaments/${tourId}/bracket/${targetRound}/${targetIndex}/${updateField}`).set(winnerName);
+        Object.keys(brackets).forEach(r => {
+            brackets[r].forEach((m, i) => {
+                if (m.id == targetMatchId) {
+                    targetRound = r;
+                    targetIndex = i;
                 }
-            }
+            });
         });
+
+        if (targetRound) {
+            const m = brackets[targetRound][targetIndex];
+            const field = !m.teamA ? 'teamA' : 'teamB';
+            database.ref(`tournaments/${tourId}/bracket/${targetRound}/${targetIndex}/${field}`).set(teamName);
+        }
+    });
+}
+
+function updateLeaderboardPoints(teamName, rank, isPaid) {
+    if(!teamName) return;
+    database.ref(`teams/${teamName}/stats`).once('value', snapshot => {
+        const stats = snapshot.val() || { ch1:0, ch2:0, ch3:0, paidCh1:0, paidCh2:0, paidCh3:0 };
+        const updates = {};
+        
+        if (isPaid) {
+            if (rank === 1) updates[`teams/${teamName}/stats/paidCh1`] = (stats.paidCh1 || 0) + 1;
+            if (rank === 2) updates[`teams/${teamName}/stats/paidCh2`] = (stats.paidCh2 || 0) + 1;
+            if (rank === 3) updates[`teams/${teamName}/stats/paidCh3`] = (stats.paidCh3 || 0) + 1;
+        } else {
+            if (rank === 1) updates[`teams/${teamName}/stats/ch1`] = (stats.ch1 || 0) + 1;
+            if (rank === 2) updates[`teams/${teamName}/stats/ch2`] = (stats.ch2 || 0) + 1;
+            if (rank === 3) updates[`teams/${teamName}/stats/ch3`] = (stats.ch3 || 0) + 1;
+        }
+        
+        database.ref().update(updates);
     });
 }
 
