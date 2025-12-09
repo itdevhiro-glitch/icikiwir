@@ -28,7 +28,7 @@ document.getElementById('to-login-btn').addEventListener('click', (e) => {
 
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    authStatus.textContent = 'Loading...';
+    authStatus.textContent = 'Authenticating...';
     
     const inputUsername = loginForm.loginUsername.value.trim().toLowerCase();
     const inputPassword = loginForm.loginPassword.value;
@@ -40,8 +40,8 @@ loginForm.addEventListener('submit', async (e) => {
         }
 
         const team = await getTeamDataByUsername(inputUsername);
-        if (!team) throw new Error("Username tidak ditemukan");
-        if (team.data.isBanned) throw new Error("Akun dibanned");
+        if (!team) throw new Error("Username not found");
+        if (team.data.isBanned) throw new Error("Team is BANNED");
         
         await auth.signInWithEmailAndPassword(team.data.email, inputPassword);
     } catch (err) {
@@ -51,18 +51,18 @@ loginForm.addEventListener('submit', async (e) => {
 
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    authStatus.textContent = 'Mendaftar...';
+    authStatus.textContent = 'Registering...';
     const username = registerForm.regUsername.value.trim().toLowerCase();
     const email = registerForm.regEmail.value.trim();
     
     if (!email.endsWith('@icikiwir.digital')) {
-        authStatus.textContent = 'Wajib email @icikiwir.digital';
+        authStatus.textContent = 'Email must end with @icikiwir.digital';
         return;
     }
     
     try {
         const check = await getTeamDataByUsername(username);
-        if(check) throw new Error("Username sudah dipakai");
+        if(check) throw new Error("Username taken");
         
         const cred = await auth.createUserWithEmailAndPassword(email, registerForm.regPassword.value);
         
@@ -73,10 +73,11 @@ registerForm.addEventListener('submit', async (e) => {
             email: email,
             isApproved: false,
             isBanned: false,
+            stats: { ch1: 0, ch2: 0, ch3: 0, paidCh1: 0, paidCh2: 0, paidCh3: 0 },
             players: []
         });
         
-        alert("Berhasil! Silakan Login.");
+        alert("Registration Successful. Please Login.");
         window.location.reload();
     } catch (err) {
         authStatus.textContent = err.message;
