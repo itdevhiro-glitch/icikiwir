@@ -91,7 +91,7 @@
 
                 <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
                     <h3>Live Bracket Control</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 10px;">Click on a match to edit score & format.</p>
+                    <p style="color: var(--text-muted); margin-bottom: 10px;">Click MATCH to edit Score. Click DONE to finish match & move winner.</p>
                     <div id="admin-bracket-view" style="overflow-x: auto; white-space: nowrap;"></div>
                 </div>
             </div>
@@ -124,9 +124,10 @@
                 </div>
             </div>
 
-            <div style="display:flex; gap:10px;">
-                <button class="btn-action" style="background:var(--danger);" onclick="closeScoreModal()">Cancel</button>
-                <button class="btn-action" onclick="saveMatchScore()">Update Score</button>
+            <div style="display:flex; gap:10px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn-action" style="background:var(--danger); width:40%;" onclick="closeScoreModal()">Cancel</button>
+                <button class="btn-action" style="width:40%;" onclick="saveMatchScore(false)">Save Only</button>
+                <button class="btn-action" style="background:var(--gold); color:black; width:100%; margin-top:10px;" onclick="saveMatchScore(true)">FINISH MATCH (DONE)</button>
             </div>
         </div>
     </div>
