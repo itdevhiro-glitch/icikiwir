@@ -2,65 +2,134 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Icikiwir Family</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Panel - Icikiwir Esports</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="header">
-        <h1>🦁 Admin Control</h1>
+
+    <aside class="sidebar">
+        <div class="logo-area">
+            <div class="logo-icon" style="background:var(--danger);"><i class="ri-admin-line"></i></div>
+            <span class="brand-name">Admin<br><span style="color:var(--text-muted); font-weight:400; font-size:0.9rem;">Control Center</span></span>
+        </div>
+        
         <nav id="main-nav">
-            <button class="nav-btn active" onclick="showSection('dashboard', this)">🏠 Dashboard</button>
-            <button class="nav-btn logout" onclick="handleLogout()">🚪 Logout</button>
+            <button class="nav-btn active" onclick="showSection('dashboard', this)">
+                <i class="ri-dashboard-line"></i> <span>Dashboard</span>
+            </button>
+             <button class="nav-btn" onclick="showSection('teams', this)">
+                <i class="ri-group-line"></i> <span>Manage Teams</span>
+            </button>
+            <button class="nav-btn logout" onclick="handleLogout()">
+                <i class="ri-logout-box-line"></i> <span>Logout</span>
+            </button>
         </nav>
-    </header>
+    </aside>
 
     <main id="app-content">
         <div id="admin-dashboard-section" class="dashboard-grid">
-            
             <div class="card">
-                <h3>✨ Buat Turnamen Baru</h3>
+                <div class="section-title">Create Tournament</div>
                 <form id="create-tournament-form" class="form-container">
-                    <input type="text" id="tourName" placeholder="Nama Turnamen (Ex: Season 1)" required>
-                    <input type="number" id="tourMax" placeholder="Slot Max Team (Ex: 8, 16)" required>
-                    <input type="date" id="tourDate" required>
-                    <button type="submit">🚀 Luncurkan Turnamen</button>
+                    <input type="text" id="tourName" placeholder="Tournament Name (Ex: Season 1)" required>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="number" id="tourMax" placeholder="Max Slots" required>
+                        <select id="tourFormat">
+                            <option value="1">Best of 1 (BO1)</option>
+                            <option value="3">Best of 3 (BO3)</option>
+                            <option value="5">Best of 5 (BO5)</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px;">
+                        <input type="number" id="tourFee" placeholder="Fee (0 = Free)" required>
+                        <input type="number" id="tourPrize" placeholder="Total Prize Pool" required>
+                    </div>
+                    
+                    <textarea id="tourRules" placeholder="Tournament Rules..." rows="4" style="margin-top:10px;" required></textarea>
+                    
+                    <input type="date" id="tourDate" required style="margin-top:10px;">
+                    <button type="submit" class="btn-action">Create Tournament</button>
                 </form>
             </div>
 
             <div class="card">
-                <h3>📋 Daftar Turnamen</h3>
+                <div class="section-title">Tournament List</div>
                 <div id="tournament-list-container" style="max-height: 400px; overflow-y: auto;">
                     <p>Loading...</p>
                 </div>
             </div>
         </div>
+        
+        <div id="admin-teams-section" class="hidden">
+             <div class="card full-width">
+                <div class="section-title">Team Stats Manager (Leaderboard)</div>
+                <div id="team-stats-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:15px;"></div>
+             </div>
+        </div>
 
         <div id="tournament-control-section" class="hidden">
             <div class="card full-width">
-                <button class="nav-btn" onclick="showSection('dashboard')" style="margin-bottom: 20px;">⬅️ Kembali</button>
-                <h2 id="control-title">Kontrol Turnamen</h2>
+                <button class="nav-btn" onclick="showSection('dashboard')" style="margin-bottom: 20px; width:fit-content; border:1px solid rgba(255,255,255,0.2);">⬅️ Back</button>
+                <h2 id="control-title" style="color:white;">Control</h2>
+                <div id="format-display" style="color:var(--neon-blue); font-weight:bold; margin-bottom:5px;"></div>
+                <div id="fee-display" style="color:var(--gold); font-size:0.9rem; margin-bottom:15px;"></div>
                 
-                <div class="dashboard-grid">
-                    <div style="background: #f5f5f5; padding: 15px; border-radius: 15px;">
-                        <h4>⚙️ Aksi Admin</h4>
+                <div class="dashboard-grid" style="margin-top:20px;">
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                        <h4>Actions</h4>
                         <div id="admin-actions"></div>
                     </div>
                     
-                    <div style="background: #f5f5f5; padding: 15px; border-radius: 15px;">
-                        <h4>👥 Tim Terdaftar</h4>
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                        <h4>Registered Teams</h4>
                         <ul id="participant-list" style="list-style: none; padding: 0;"></ul>
                     </div>
                 </div>
 
-                <div style="margin-top: 20px; border-top: 2px dashed #ccc; padding-top: 20px;">
-                    <h3>📊 Live Bracket Control</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 10px;">Klik nama tim untuk menetapkan pemenang pertandingan.</p>
-                    <div id="admin-bracket-view"></div>
+                <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <h3>Live Bracket Control</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 10px;">Click on a match to edit score & format.</p>
+                    <div id="admin-bracket-view" style="overflow-x: auto; white-space: nowrap;"></div>
                 </div>
             </div>
         </div>
     </main>
+
+    <div id="score-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align:center;">
+            <h3 style="margin-top:0;">Edit Match Score</h3>
+            <p id="score-modal-match-info" style="color:var(--text-muted); font-size:0.9rem; margin-bottom:10px;"></p>
+            
+            <div style="margin-bottom:20px;">
+                <label style="color:var(--text-muted); display:block; margin-bottom:5px;">Match Format:</label>
+                <select id="modalMatchFormat" class="form-container" style="width:150px; margin:0 auto; padding:5px;">
+                    <option value="1">Best of 1</option>
+                    <option value="3">Best of 3</option>
+                    <option value="5">Best of 5</option>
+                </select>
+            </div>
+
+            <div style="display:flex; justify-content:space-around; align-items:center; margin-bottom:20px;">
+                <div style="width:45%;">
+                    <h4 id="score-team-a-name" style="margin:0 0 10px 0; color:var(--neon-purple);">Team A</h4>
+                    <input type="number" id="input-score-a" style="width:60px; height:50px; font-size:1.5rem; text-align:center; background:var(--bg-body); border:1px solid #555; color:white; border-radius:10px;">
+                </div>
+                <div style="font-weight:bold; font-size:1.5rem;">VS</div>
+                <div style="width:45%;">
+                    <h4 id="score-team-b-name" style="margin:0 0 10px 0; color:var(--neon-purple);">Team B</h4>
+                    <input type="number" id="input-score-b" style="width:60px; height:50px; font-size:1.5rem; text-align:center; background:var(--bg-body); border:1px solid #555; color:white; border-radius:10px;">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" style="background:var(--danger);" onclick="closeScoreModal()">Cancel</button>
+                <button class="btn-action" onclick="saveMatchScore()">Update Score</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
