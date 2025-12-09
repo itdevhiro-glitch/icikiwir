@@ -413,16 +413,29 @@ async function showBracketView(tournamentId) {
     
     showSection('bracket');
     
-    const roundKeys = Object.keys(tournament.bracket).sort((a,b) => b.localeCompare(a)).reverse(); 
+    const sortedKeys = Object.keys(tournament.bracket).sort((a,b) => {
+        if(a === 'bronze') return 1;
+        if(b === 'bronze') return -1;
+        const numA = parseInt(a.replace('r', ''));
+        const numB = parseInt(b.replace('r', ''));
+        return numA - numB;
+    });
+    
     let html = `<h3 style="margin-bottom:0;">${tournament.name}</h3><p style="color:var(--neon-blue); font-size:0.9rem; margin-bottom:20px;">MIXED FORMAT</p><div style="display:flex; gap:30px;">`;
     
-    roundKeys.forEach(roundName => {
-        html += `<div style="display:flex; flex-direction:column; gap:20px; justify-content:center; min-width:180px;"><div style="margin-bottom:10px; font-weight:bold; color:var(--neon-purple); text-align:center;">${roundName.toUpperCase()}</div>`;
+    sortedKeys.forEach(roundName => {
+        let title = roundName.toUpperCase();
+        if(roundName === 'bronze') title = "BRONZE MATCH";
+        else if(tournament.bracket[roundName].length === 1 && roundName !== 'r1') title = "GRAND FINAL";
+
+        html += `<div style="display:flex; flex-direction:column; gap:20px; justify-content:center; min-width:180px;"><div style="margin-bottom:10px; font-weight:bold; color:var(--neon-purple); text-align:center;">${title}</div>`;
         tournament.bracket[roundName].forEach(m => {
             const winnerA = m.winner === m.teamA;
             const winnerB = m.winner === m.teamB;
+            const styleDone = m.completed ? 'opacity:0.6;' : '';
+
             html += `
-                <div class="match-card">
+                <div class="match-card" style="${styleDone}">
                     <div style="text-align:center; font-size:0.7rem; color:#aaa; margin-bottom:5px;">BO${m.format || 1}</div>
                     <div class="match-team ${winnerA ? 'winner' : (m.winner ? 'loser' : '')}" style="display:flex; justify-content:space-between;">
                         <span class="clickable-team" onclick="inspectTournamentRoster('${tournamentId}', '${m.teamA}')">${m.teamA || 'TBD'}</span> <span style="font-weight:bold; font-size:1.1rem; color:${winnerA ? 'var(--neon-blue)' : 'white'}">${m.scoreA || 0}</span>
