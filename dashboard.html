@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Icikiwir Family</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>🦁 Icikiwir Family</h1>
+        <nav id="main-nav">
+        </nav>
+    </header>
+
+    <main id="app-content">
+        <div id="dashboard-section" class="dashboard-grid">
+            <div class="card full-width">
+                <h2>Loading Data... 🚀</h2>
+            </div>
+        </div>
+
+        <div id="bracket-section" class="hidden">
+            <div class="card full-width">
+                <h2>📊 Bagan Turnamen</h2>
+                <div id="tournament-bracket-view">
+                    <p style="text-align: center; color: var(--text-muted);">Pilih turnamen yang sedang berjalan untuk melihat bagan.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

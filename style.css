@@ -1,0 +1,303 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap');
+
+:root {
+    --primary: #FF9800;
+    --primary-dark: #F57C00;
+    --secondary: #1A237E;
+    --bg-color: #E3F2FD;
+    --card-bg: #FFFFFF;
+    --text-main: #263238;
+    --text-muted: #546E7A;
+    --danger: #FF5252;
+    --success: #4CAF50;
+    --border-radius: 24px;
+    --shadow-card: 0 8px 0 rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-btn: 0 6px 0 #E65100;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Nunito', sans-serif;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    padding-bottom: 50px;
+}
+
+.header {
+    background-color: var(--secondary);
+    color: white;
+    padding: 15px 20px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: 0 10px 20px rgba(26, 35, 126, 0.2);
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header h1 {
+    margin: 10px 0 20px 0;
+    font-weight: 900;
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+}
+
+#main-nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+.nav-btn {
+    background: white;
+    color: var(--secondary);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 0 #CFD8DC;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-block;
+}
+
+.nav-btn:hover, .nav-btn.active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #CFD8DC;
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 2px 0 var(--primary-dark);
+}
+
+.nav-btn.logout {
+    background-color: var(--danger);
+    color: white;
+    box-shadow: 0 4px 0 #D32F2F;
+}
+
+#app-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .full-width {
+        grid-column: span 2;
+    }
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow-card);
+    border: 2px solid white;
+    position: relative;
+    overflow: hidden;
+}
+
+.card h2, .card h3 {
+    color: var(--secondary);
+    font-weight: 800;
+    margin-top: 0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 2px solid #CFD8DC;
+    border-radius: 15px;
+    font-size: 1rem;
+    background-color: #F7F9F9;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.form-container input:focus {
+    border-color: var(--primary);
+    background-color: #FFF3E0;
+    outline: none;
+}
+
+button[type="submit"], .btn-action {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 15px;
+    background-color: var(--primary);
+    color: white;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: var(--shadow-btn);
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+button[type="submit"]:hover, .btn-action:hover {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #E65100;
+    background-color: var(--primary-dark);
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #F5F5F5;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-info small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.btn-remove {
+    background: #FFEBEE;
+    color: var(--danger);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 0.8rem;
+}
+
+.tournament-card {
+    border: 2px dashed #B0BEC5;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #FAFAFA;
+}
+
+.tournament-card h4 {
+    margin: 0 0 10px 0;
+    color: var(--secondary);
+    font-weight: 800;
+}
+
+#tournament-bracket-view, #admin-bracket-view {
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+.bracket-flex {
+    display: flex;
+    gap: 40px;
+    padding: 10px;
+    min-width: max-content;
+}
+
+.round-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+}
+
+.round-title {
+    text-align: center;
+    background: var(--secondary);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+
+.match-card {
+    background: white;
+    border: 3px solid var(--text-main);
+    border-radius: 15px;
+    padding: 10px;
+    min-width: 180px;
+    position: relative;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+}
+
+.match-team {
+    padding: 5px;
+    border-bottom: 1px dashed #ccc;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+}
+
+.match-team:last-child {
+    border-bottom: none;
+}
+
+.match-team.winner {
+    background-color: #C8E6C9;
+    color: #1B5E20;
+}
+
+.match-team.loser {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+.round-column:not(:last-child) .match-card::after {
+    content: '➜';
+    position: absolute;
+    right: -35px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.auth-box {
+    width: 100%;
+    max-width: 400px;
+}
+
+.hidden {
+    display: none !important;
+}

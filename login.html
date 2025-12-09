@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Icikiwir Family</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>🦁 Icikiwir Family</h1>
+    </div>
+
+    <main class="auth-wrapper">
+        <div class="card auth-box">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="justify-content: center;">Selamat Datang! 👋</h2>
+                <p id="auth-status-message" style="color: var(--danger); font-weight: bold; font-size: 0.9rem;"></p>
+            </div>
+
+            <form id="login-form" class="form-container">
+                <input type="text" id="loginUsername" placeholder="Username Tim / Admin" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">MASUK</button>
+                <p style="text-align: center; margin-top: 15px;">
+                    Belum punya akun? <a href="#" id="to-register-btn" style="color: var(--primary); font-weight: 800;">Daftar Tim</a>
+                </p>
+            </form>
+
+            <form id="register-form" class="form-container hidden">
+                <input type="text" id="regUsername" placeholder="Username (Tanpa Spasi)" required>
+                <input type="text" id="regTeamName" placeholder="Nama Tim (Cth: RRQ Hoshi)" required>
+                <input type="email" id="regEmail" placeholder="Email (@icikiwir.digital)" required>
+                <input type="password" id="regPassword" placeholder="Password" required>
+                <button type="submit" style="background-color: var(--secondary);">DAFTAR TIM</button>
+                <p style="text-align: center; margin-top: 15px;">
+                    Sudah punya akun? <a href="#" id="to-login-btn" style="color: var(--primary); font-weight: 800;">Login</a>
+                </p>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>

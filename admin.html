@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Icikiwir Family</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>🦁 Admin Control</h1>
+        <nav id="main-nav">
+            <button class="nav-btn active" onclick="showSection('dashboard', this)">🏠 Dashboard</button>
+            <button class="nav-btn logout" onclick="handleLogout()">🚪 Logout</button>
+        </nav>
+    </header>
+
+    <main id="app-content">
+        <div id="admin-dashboard-section" class="dashboard-grid">
+            
+            <div class="card">
+                <h3>✨ Buat Turnamen Baru</h3>
+                <form id="create-tournament-form" class="form-container">
+                    <input type="text" id="tourName" placeholder="Nama Turnamen (Ex: Season 1)" required>
+                    <input type="number" id="tourMax" placeholder="Slot Max Team (Ex: 8, 16)" required>
+                    <input type="date" id="tourDate" required>
+                    <button type="submit">🚀 Luncurkan Turnamen</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>📋 Daftar Turnamen</h3>
+                <div id="tournament-list-container" style="max-height: 400px; overflow-y: auto;">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tournament-control-section" class="hidden">
+            <div class="card full-width">
+                <button class="nav-btn" onclick="showSection('dashboard')" style="margin-bottom: 20px;">⬅️ Kembali</button>
+                <h2 id="control-title">Kontrol Turnamen</h2>
+                
+                <div class="dashboard-grid">
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 15px;">
+                        <h4>⚙️ Aksi Admin</h4>
+                        <div id="admin-actions"></div>
+                    </div>
+                    
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 15px;">
+                        <h4>👥 Tim Terdaftar</h4>
+                        <ul id="participant-list" style="list-style: none; padding: 0;"></ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; border-top: 2px dashed #ccc; padding-top: 20px;">
+                    <h3>📊 Live Bracket Control</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 10px;">Klik nama tim untuk menetapkan pemenang pertandingan.</p>
+                    <div id="admin-bracket-view"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
