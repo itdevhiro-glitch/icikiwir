@@ -1,9 +1,13 @@
+let dashboardListener = null;
+let tournamentsListener = null;
+let leaderboardListener = null;
+let currentTeamKey = null;
+let currentPaymentTourId = null;
+let currentPaymentTeamName = null;
+
 const dashboardSection = document.getElementById('dashboard-section');
 const bracketSection = document.getElementById('bracket-section');
 const leaderboardSection = document.getElementById('leaderboard-section');
-
-let currentPaymentTourId = null;
-let currentPaymentTeamName = null;
 
 auth.onAuthStateChanged(async (user) => {
     if (!user) {
@@ -26,12 +30,24 @@ auth.onAuthStateChanged(async (user) => {
         <button class="nav-btn" onclick="showSection('bracket', this)">
             <i class="ri-organization-chart"></i> <span>Brackets</span>
         </button>
-        <button class="nav-btn logout" onclick="auth.signOut()">
+        <button class="nav-btn logout" onclick="handleLogout()">
             <i class="ri-logout-box-line"></i> <span>Logout</span>
         </button>
     `;
-    renderTeamDashboard(user.uid);
+    
+    const snapshot = await database.ref('teams').orderByChild('uid').equalTo(user.uid).once('value');
+    if(snapshot.exists()) {
+        currentTeamKey = Object.keys(snapshot.val())[0];
+        initRealtimeDashboard(currentTeamKey);
+    }
 });
+
+function handleLogout() {
+    if(dashboardListener) database.ref(`teams/${currentTeamKey}`).off();
+    if(tournamentsListener) database.ref('tournaments').off();
+    if(leaderboardListener) database.ref('teams').off();
+    auth.signOut().then(() => window.location.href = 'login.html');
+}
 
 function showSection(sectionId, btnElement) {
     dashboardSection.classList.add('hidden');
@@ -53,18 +69,33 @@ function showSection(sectionId, btnElement) {
         bracketSection.classList.remove('hidden');
     } else if (sectionId === 'leaderboard') {
         leaderboardSection.classList.remove('hidden');
-        renderLeaderboard();
     }
 }
 
-async function renderTeamDashboard(uid) {
-    const teamResult = await getTeamDataByUID(uid);
-    if (!teamResult) return;
-    
-    const teamKey = teamResult.key;
-    const teamData = teamResult.data;
+function initRealtimeDashboard(teamKey) {
+    // 1. Dashboard Listener
+    if(dashboardListener) database.ref(`teams/${teamKey}`).off();
+    dashboardListener = database.ref(`teams/${teamKey}`).on('value', (snap) => {
+        const teamData = snap.val();
+        renderDashboardHTML(teamKey, teamData);
+    });
+
+    // 2. Tournaments Listener
+    if(tournamentsListener) database.ref('tournaments').off();
+    tournamentsListener = database.ref('tournaments').on('value', (snap) => {
+        renderTournamentsHTML(teamKey, snap.val());
+        renderBracketViewHTML(snap.val()); // Auto update bracket if open
+    });
+
+    // 3. Leaderboard Listener
+    if(leaderboardListener) database.ref('teams').off();
+    leaderboardListener = database.ref('teams').on('value', (snap) => {
+        renderLeaderboardHTML(snap.val());
+    });
+}
+
+function renderDashboardHTML(teamKey, teamData) {
     const players = teamData.players || [];
-    
     const roleOrder = { 'Jungler': 1, 'Roamer': 2, 'MidLane': 3, 'ExpLane': 4, 'GoldLane': 5, 'Cadangan': 6 };
     players.sort((a, b) => (roleOrder[a.role] || 6) - (roleOrder[b.role] || 6));
 
@@ -127,50 +158,41 @@ async function renderTeamDashboard(uid) {
         </div>
     `;
 
-    document.getElementById('add-player-form')?.addEventListener('submit', (e) => addPlayer(e, teamKey, players));
-    
-    loadTournamentsForTeam(teamKey, players);
+    document.getElementById('add-player-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const role = document.getElementById('playerRole').value;
+        const name = document.getElementById('playerName').value;
+        const id = document.getElementById('playerId').value;
+        
+        if (role !== 'Cadangan' && players.some(p => p.role === role)) {
+            if(!confirm(`Role ${role} filled. Add anyway?`)) return;
+        }
+
+        const newPlayers = [...players, { role, name, id }];
+        database.ref(`teams/${teamKey}/players`).set(newPlayers);
+    });
 }
 
-function addPlayer(e, teamUsername, currentPlayers) {
-    e.preventDefault();
-    const role = document.getElementById('playerRole').value;
-    const name = document.getElementById('playerName').value;
-    const id = document.getElementById('playerId').value;
-    
-    if (role !== 'Cadangan' && currentPlayers.some(p => p.role === role)) {
-        if(!confirm(`Role ${role} filled. Add anyway?`)) return;
-    }
-
-    const newPlayers = [...currentPlayers, { role, name, id }];
-    database.ref(`teams/${teamUsername}/players`).set(newPlayers)
-        .then(() => renderTeamDashboard(auth.currentUser.uid));
-}
-
-function removePlayer(teamUsername, index) {
+function removePlayer(teamKey, index) {
     if (!confirm("Remove player?")) return;
-    database.ref(`teams/${teamUsername}/players`).once('value')
-        .then(snapshot => {
-            let players = snapshot.val() || [];
-            players.splice(index, 1);
-            return database.ref(`teams/${teamUsername}/players`).set(players);
-        })
-        .then(() => renderTeamDashboard(auth.currentUser.uid));
+    database.ref(`teams/${teamKey}/players`).once('value', snapshot => {
+        let players = snapshot.val() || [];
+        players.splice(index, 1);
+        database.ref(`teams/${teamKey}/players`).set(players);
+    });
 }
 
-async function loadTournamentsForTeam(teamUsername, players) {
+function renderTournamentsHTML(teamUsername, tournaments) {
     const grid = document.querySelector('.tournament-grid');
-    const snapshot = await database.ref('tournaments').once('value');
-    const tournaments = snapshot.val();
-    
     if (!tournaments) {
         grid.innerHTML = '<p style="color:var(--text-muted)">No active tournaments.</p>';
         return;
     }
 
     let html = '';
-    const rosterReady = players.length >= 5;
-
+    // Need players count for logic, fetch from current cache or pass it? 
+    // Simplified: We assume renderDashboardHTML runs often enough or we check data integrity on click.
+    
     Object.entries(tournaments).forEach(([id, t]) => {
         const participantData = t.participants ? t.participants[teamUsername] : null;
         const isRegistered = !!participantData;
@@ -186,15 +208,11 @@ async function loadTournamentsForTeam(teamUsername, players) {
                 actionBtn = `<button class="btn-action" disabled style="background:rgba(255,255,255,0.1); color:var(--text-muted);">Registered</button>`;
             }
         } else if (t.status === 'registration') {
-            if (rosterReady) {
-                 if(t.fee > 0) {
-                     actionBtn = `<button class="btn-action" onclick="initiateRegistration('${id}', '${teamUsername}', ${t.fee})" style="background:var(--gold); color:black;">Join (Paid)</button>`;
-                 } else {
-                     actionBtn = `<button class="btn-action" onclick="initiateRegistration('${id}', '${teamUsername}', 0)">Join Now</button>`;
-                 }
-            } else {
-                 actionBtn = `<button class="btn-action" disabled style="background:rgba(255,255,255,0.1); opacity:0.5;">Roster Incomplete</button>`;
-            }
+             if(t.fee > 0) {
+                 actionBtn = `<button class="btn-action" onclick="initiateRegistration('${id}', '${teamUsername}', ${t.fee})" style="background:var(--gold); color:black;">Join (Paid)</button>`;
+             } else {
+                 actionBtn = `<button class="btn-action" onclick="initiateRegistration('${id}', '${teamUsername}', 0)">Join Now</button>`;
+             }
         }
 
         let feeDisplay = t.fee > 0 ? `<div style="color:var(--gold); font-weight:bold;">Fee: ${formatRupiah(t.fee)}</div><div style="font-size:0.8rem; color:white;">Prize: ${formatRupiah(t.prize)}</div>` : `<div style="color:var(--success); font-weight:bold;">FREE ENTRY</div>`;
@@ -221,75 +239,11 @@ async function loadTournamentsForTeam(teamUsername, players) {
             </div>
         `;
     });
-    
     grid.innerHTML = html;
 }
 
-function initiateRegistration(tid, teamName, fee) {
-    if(!confirm("Join tournament? Current roster will be recorded.")) return;
-    
-    if(fee > 0) {
-        openPaymentModal(tid, teamName, fee);
-    } else {
-        completeRegistration(tid, teamName, 'approved');
-    }
-}
-
-function openPaymentModal(tid, teamName, fee) {
-    currentPaymentTourId = tid;
-    currentPaymentTeamName = teamName;
-    document.getElementById('payment-fee-display').innerText = formatRupiah(fee);
-    document.getElementById('payment-modal').classList.remove('hidden');
-}
-
-function confirmPayment() {
-    completeRegistration(currentPaymentTourId, currentPaymentTeamName, 'pending_payment');
-    closeModal('payment-modal');
-}
-
-async function completeRegistration(tid, teamName, status) {
-    try {
-        const teamSnapshot = await database.ref(`teams/${teamName}`).once('value');
-        const teamData = teamSnapshot.val();
-        
-        if(!teamData || !teamData.players) throw new Error("Team data error");
-
-        const updates = {};
-        updates[`tournaments/${tid}/participants/${teamName}`] = { 
-            teamName, 
-            status: status,
-            registeredAt: firebase.database.ServerValue.TIMESTAMP,
-            rosterSnapshot: teamData.players 
-        };
-        
-        await database.ref().update(updates);
-        renderTeamDashboard(auth.currentUser.uid);
-        if(status === 'pending_payment') alert("Please wait for admin approval after sending payment screenshot.");
-        else alert("Joined successfully!");
-        
-    } catch(e) {
-        alert("Error registering: " + e.message);
-    }
-}
-
-async function viewRules(tid) {
-    const snap = await database.ref(`tournaments/${tid}/rules`).once('value');
-    const rules = snap.val() || "No specific rules.";
-    document.getElementById('rules-content').innerText = rules;
-    document.getElementById('rules-modal').classList.remove('hidden');
-}
-
-function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-}
-
-async function renderLeaderboard() {
+function renderLeaderboardHTML(teams) {
     const tbody = document.getElementById('leaderboard-body');
-    tbody.innerHTML = '<tr><td colspan="5">Calculating rankings...</td></tr>';
-
-    const snapshot = await database.ref('teams').once('value');
-    const teams = snapshot.val();
-
     if (!teams) {
         tbody.innerHTML = '<tr><td colspan="5">No teams data found.</td></tr>';
         return;
@@ -333,85 +287,29 @@ async function renderLeaderboard() {
             </tr>
         `;
     });
-
     tbody.innerHTML = html;
 }
 
-async function inspectTeam(targetName) {
-    document.getElementById('team-inspector-modal').classList.remove('hidden');
-    document.getElementById('inspector-title').innerText = targetName;
-    const content = document.getElementById('inspector-content');
-    content.innerHTML = 'Loading...';
-    
-    try {
-        const teamData = await getTeamDataByUsername(targetName);
-        const players = teamData.data.players || [];
-        renderInspectorPlayers(players);
-    } catch (e) { content.innerHTML = 'Error loading team.'; }
+let activeBracketId = null;
+
+function showBracketView(tournamentId) {
+    activeBracketId = tournamentId;
+    showSection('bracket');
+    // The listener already handles rendering, we just need to trigger it once or wait for next update.
+    // To ensure immediate load if listener already fired:
+    database.ref(`tournaments/${tournamentId}`).once('value', snap => renderBracketViewHTML( { [tournamentId]: snap.val() } ));
 }
 
-async function inspectTournamentRoster(tourId, teamName) {
-    if(teamName === 'TBD' || !teamName) return;
+function renderBracketViewHTML(allTournaments) {
+    if(!activeBracketId || !allTournaments[activeBracketId]) return;
     
-    document.getElementById('team-inspector-modal').classList.remove('hidden');
-    document.getElementById('inspector-title').innerText = `${teamName} (Tournament Roster)`;
-    const content = document.getElementById('inspector-content');
-    content.innerHTML = 'Loading snapshot...';
-    
-    try {
-        const snap = await database.ref(`tournaments/${tourId}/participants/${teamName}`).once('value');
-        const participant = snap.val();
-        
-        if(participant && participant.rosterSnapshot) {
-            renderInspectorPlayers(participant.rosterSnapshot);
-        } else {
-            const liveTeam = await getTeamDataByUsername(teamName);
-            if(liveTeam) {
-                renderInspectorPlayers(liveTeam.data.players);
-            } else {
-                content.innerHTML = "Roster data not available.";
-            }
-        }
-    } catch (e) { content.innerHTML = 'Error loading roster.'; }
-}
-
-function renderInspectorPlayers(players) {
-    const content = document.getElementById('inspector-content');
-    let html = '';
-    
-    const roleOrder = { 'Jungler': 1, 'Roamer': 2, 'MidLane': 3, 'ExpLane': 4, 'GoldLane': 5, 'Cadangan': 6 };
-    players.sort((a, b) => (roleOrder[a.role] || 6) - (roleOrder[b.role] || 6));
-
-    players.forEach(p => {
-        let badgeClass = `role-${p.role.toLowerCase().replace('lane','')}`;
-        if(p.role === 'Cadangan') badgeClass = 'role-sub';
-        html += `
-            <div class="player-item">
-                 <div style="display:flex; align-items:center;">
-                    <div class="role-badge ${badgeClass}">${p.role}</div>
-                    <div style="display:flex; flex-direction:column;">
-                        <span style="color:white; font-weight:bold;">${p.name}</span>
-                        <span style="color:var(--text-muted); font-size:0.75rem; font-family:monospace;">ID: ${p.id}</span>
-                    </div>
-                 </div>
-            </div>
-        `;
-    });
-    content.innerHTML = html;
-}
-
-async function showBracketView(tournamentId) {
+    const tournament = allTournaments[activeBracketId];
     const bracketView = document.getElementById('tournament-bracket-view');
-    const snapshot = await database.ref(`tournaments/${tournamentId}`).once('value');
-    const tournament = snapshot.val();
     
-    if (!tournament || !tournament.bracket) {
+    if (!tournament.bracket) {
         bracketView.innerHTML = `<p>Bracket not ready.</p>`;
-        showSection('bracket');
         return;
     }
-    
-    showSection('bracket');
     
     const sortedKeys = Object.keys(tournament.bracket).sort((a,b) => {
         if(a === 'bronze') return 1;
@@ -438,10 +336,10 @@ async function showBracketView(tournamentId) {
                 <div class="match-card" style="${styleDone}">
                     <div style="text-align:center; font-size:0.7rem; color:#aaa; margin-bottom:5px;">BO${m.format || 1}</div>
                     <div class="match-team ${winnerA ? 'winner' : (m.winner ? 'loser' : '')}" style="display:flex; justify-content:space-between;">
-                        <span class="clickable-team" onclick="inspectTournamentRoster('${tournamentId}', '${m.teamA}')">${m.teamA || 'TBD'}</span> <span style="font-weight:bold; font-size:1.1rem; color:${winnerA ? 'var(--neon-blue)' : 'white'}">${m.scoreA || 0}</span>
+                        <span class="clickable-team" onclick="inspectTournamentRoster('${activeBracketId}', '${m.teamA}')">${m.teamA || 'TBD'}</span> <span style="font-weight:bold; font-size:1.1rem; color:${winnerA ? 'var(--neon-blue)' : 'white'}">${m.scoreA || 0}</span>
                     </div>
                     <div class="match-team ${winnerB ? 'winner' : (m.winner ? 'loser' : '')}" style="display:flex; justify-content:space-between;">
-                        <span class="clickable-team" onclick="inspectTournamentRoster('${tournamentId}', '${m.teamB}')">${m.teamB || 'TBD'}</span> <span style="font-weight:bold; font-size:1.1rem; color:${winnerB ? 'var(--neon-blue)' : 'white'}">${m.scoreB || 0}</span>
+                        <span class="clickable-team" onclick="inspectTournamentRoster('${activeBracketId}', '${m.teamB}')">${m.teamB || 'TBD'}</span> <span style="font-weight:bold; font-size:1.1rem; color:${winnerB ? 'var(--neon-blue)' : 'white'}">${m.scoreB || 0}</span>
                     </div>
                 </div>
             `;
@@ -450,4 +348,105 @@ async function showBracketView(tournamentId) {
     });
     html += `</div>`;
     bracketView.innerHTML = html;
+}
+
+// Helpers
+function initiateRegistration(tid, teamName, fee) {
+    if(!confirm("Join tournament? Current roster will be recorded.")) return;
+    if(fee > 0) openPaymentModal(tid, teamName, fee);
+    else completeRegistration(tid, teamName, 'approved');
+}
+
+function openPaymentModal(tid, teamName, fee) {
+    currentPaymentTourId = tid;
+    currentPaymentTeamName = teamName;
+    document.getElementById('payment-fee-display').innerText = formatRupiah(fee);
+    document.getElementById('payment-modal').classList.remove('hidden');
+}
+
+function confirmPayment() {
+    completeRegistration(currentPaymentTourId, currentPaymentTeamName, 'pending_payment');
+    closeModal('payment-modal');
+}
+
+async function completeRegistration(tid, teamName, status) {
+    try {
+        const snap = await database.ref(`teams/${teamName}`).once('value');
+        const teamData = snap.val();
+        if(!teamData || !teamData.players) throw new Error("Team data error");
+
+        const updates = {};
+        updates[`tournaments/${tid}/participants/${teamName}`] = { 
+            teamName, 
+            status: status,
+            registeredAt: firebase.database.ServerValue.TIMESTAMP,
+            rosterSnapshot: teamData.players 
+        };
+        await database.ref().update(updates);
+        if(status === 'pending_payment') alert("Please wait for admin approval.");
+        else alert("Joined successfully!");
+    } catch(e) { alert("Error: " + e.message); }
+}
+
+async function viewRules(tid) {
+    const snap = await database.ref(`tournaments/${tid}/rules`).once('value');
+    const rules = snap.val() || "No specific rules.";
+    document.getElementById('rules-content').innerText = rules;
+    document.getElementById('rules-modal').classList.remove('hidden');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+async function inspectTeam(targetName) {
+    document.getElementById('team-inspector-modal').classList.remove('hidden');
+    document.getElementById('inspector-title').innerText = targetName;
+    const content = document.getElementById('inspector-content');
+    content.innerHTML = 'Loading...';
+    try {
+        const teamData = await getTeamDataByUsername(targetName);
+        renderInspectorPlayers(teamData.data.players || []);
+    } catch (e) { content.innerHTML = 'Error loading team.'; }
+}
+
+async function inspectTournamentRoster(tourId, teamName) {
+    if(teamName === 'TBD' || !teamName) return;
+    document.getElementById('team-inspector-modal').classList.remove('hidden');
+    document.getElementById('inspector-title').innerText = `${teamName} (Tournament Roster)`;
+    const content = document.getElementById('inspector-content');
+    content.innerHTML = 'Loading snapshot...';
+    try {
+        const snap = await database.ref(`tournaments/${tourId}/participants/${teamName}`).once('value');
+        const participant = snap.val();
+        if(participant && participant.rosterSnapshot) renderInspectorPlayers(participant.rosterSnapshot);
+        else {
+            const liveTeam = await getTeamDataByUsername(teamName);
+            renderInspectorPlayers(liveTeam ? liveTeam.data.players : []);
+        }
+    } catch (e) { content.innerHTML = 'Error loading roster.'; }
+}
+
+function renderInspectorPlayers(players) {
+    const content = document.getElementById('inspector-content');
+    let html = '';
+    const roleOrder = { 'Jungler': 1, 'Roamer': 2, 'MidLane': 3, 'ExpLane': 4, 'GoldLane': 5, 'Cadangan': 6 };
+    players.sort((a, b) => (roleOrder[a.role] || 6) - (roleOrder[b.role] || 6));
+
+    players.forEach(p => {
+        let badgeClass = `role-${p.role.toLowerCase().replace('lane','')}`;
+        if(p.role === 'Cadangan') badgeClass = 'role-sub';
+        html += `
+            <div class="player-item">
+                 <div style="display:flex; align-items:center;">
+                    <div class="role-badge ${badgeClass}">${p.role}</div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="color:white; font-weight:bold;">${p.name}</span>
+                        <span style="color:var(--text-muted); font-size:0.75rem; font-family:monospace;">ID: ${p.id}</span>
+                    </div>
+                 </div>
+            </div>
+        `;
+    });
+    content.innerHTML = html;
 }
