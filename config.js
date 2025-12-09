@@ -15,11 +15,19 @@ const database = firebase.database();
 const ADMIN_UID = "KMvEgDWkxfYVGjpNbqHijeHAPTz2";
 
 async function getTeamDataByUID(uid) {
-    const s = await database.ref('teams').orderByChild('uid').equalTo(uid).once('value');
-    return s.exists() ? { key: Object.keys(s.val())[0], data: Object.values(s.val())[0] } : null;
+    try {
+        const s = await database.ref('teams').orderByChild('uid').equalTo(uid).once('value');
+        return s.exists() ? { key: Object.keys(s.val())[0], data: Object.values(s.val())[0] } : null;
+    } catch (e) { return null; }
 }
 
 async function getTeamDataByUsername(u) {
-    const s = await database.ref('teams').orderByChild('username').equalTo(u).once('value');
-    return s.exists() ? { key: Object.keys(s.val())[0], data: Object.values(s.val())[0] } : null;
+    try {
+        const s = await database.ref('teams').orderByChild('username').equalTo(u).once('value');
+        return s.exists() ? { key: Object.keys(s.val())[0], data: Object.values(s.val())[0] } : null;
+    } catch (e) { return null; }
+}
+
+function formatRupiah(angka) {
+    return "Rp " + parseInt(angka).toLocaleString('id-ID');
 }
