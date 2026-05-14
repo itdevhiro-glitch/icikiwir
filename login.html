@@ -7,41 +7,84 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-<body class="auth-page">
-  <main class="auth-shell">
-    <section class="auth-hero">
-      <div class="brand-mark"><span class="brand-icon"><i class="ri-gamepad-fill"></i></span>Icikiwir Esports</div>
-      <div>
-        <h1>Esports Tournament Manager</h1>
-        <p>Dashboard modern untuk roster team, tournament, leaderboard, bracket live, payment approval, dan mode baru 1 vs 1 Brawl.</p>
+<body class="elite-page elite-login-page cinematic-auth-page">
+  <main class="cinematic-auth-shell">
+    <a class="cinematic-brand" href="index.html" aria-label="Icikiwir Esports">
+      <span>ICIKIWIR</span>
+      <small>TOURNEY</small>
+    </a>
+
+    <section class="cinematic-auth-panel" aria-label="Authentication form">
+      <div class="cinematic-auth-title">
+        <h1 id="auth-card-title">Siap tanding?</h1>
+        <p id="auth-card-subtitle">Masuk dulu, lanjut ke lobby.</p>
       </div>
-      <div class="hero-metrics"><span class="metric">Realtime Firebase</span><span class="metric">Team & Brawl</span><span class="metric">Mobile Ready</span></div>
-    </section>
-    <section class="auth-box">
-      <h2 class="auth-title">Login Account</h2>
-      <p class="auth-subtitle">Masuk sebagai admin, team, atau solo player.</p>
-      <p id="auth-status-message" class="auth-message"></p>
-      <form id="login-form" class="form-grid">
-        <input type="text" id="loginUsername" placeholder="Username / admin" autocomplete="username" required>
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
-        <button type="submit" class="btn"><i class="ri-login-circle-line"></i> Login</button>
-        <p>New team? <button id="to-register-btn" class="link-btn">Register here</button></p>
+
+      <p id="auth-status-message" class="auth-message cinematic-message"></p>
+
+      <form id="login-form" class="cinematic-form">
+        <label class="cinematic-field">
+          <i class="ri-mail-line"></i>
+          <input type="text" id="loginUsername" placeholder="Email atau username" autocomplete="username" required>
+        </label>
+
+        <label class="cinematic-field">
+          <i class="ri-lock-2-fill"></i>
+          <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
+          <button type="button" class="cinematic-eye-btn" id="toggle-password" aria-label="Show password"><i class="ri-eye-fill"></i></button>
+        </label>
+
+        <button type="submit" class="cinematic-submit-btn">Masuk</button>
+        <button type="button" class="cinematic-link-btn auth-forgot">Lupa password?</button>
+
+        <p class="cinematic-switch">Belum punya akun? <button id="to-register-btn" class="cinematic-link-btn cinematic-accent">Daftar</button></p>
       </form>
-      <form id="register-form" class="form-grid hidden">
-        <select id="regAccountType" required><option value="team">Register sebagai Team</option><option value="user">Register sebagai User / Solo Player</option></select>
-        <input type="text" id="regUsername" placeholder="Username tanpa spasi" required>
-        <input type="text" id="regTeamName" placeholder="Team Name / Nama Player" required>
-        <input type="tel" id="regWhatsapp" placeholder="WhatsApp aktif, contoh 08123456789" required>
-        <input type="email" id="regEmail" placeholder="Email @icikiwir.digital" required>
-        <input type="password" id="regPassword" placeholder="Password minimal 6 karakter" required>
-        <button type="submit" class="btn success"><i class="ri-user-add-line"></i> Register</button>
-        <p>Have account? <button id="to-login-btn" class="link-btn">Login here</button></p>
+
+      <form id="register-form" class="cinematic-form hidden">
+        <label class="cinematic-field cinematic-select">
+          <i class="ri-user-settings-line"></i>
+          <select id="regAccountType" required>
+            <option value="team">Team</option>
+            <option value="user">Solo Player</option>
+          </select>
+        </label>
+
+        <label class="cinematic-field"><i class="ri-at-line"></i><input type="text" id="regUsername" placeholder="Username" required></label>
+        <label class="cinematic-field"><i class="ri-team-line"></i><input type="text" id="regTeamName" placeholder="Team / Player name" required></label>
+        <label class="cinematic-field"><i class="ri-whatsapp-line"></i><input type="tel" id="regWhatsapp" placeholder="WhatsApp" required></label>
+        <label class="cinematic-field"><i class="ri-mail-line"></i><input type="email" id="regEmail" placeholder="Email" required></label>
+        <label class="cinematic-field"><i class="ri-lock-password-line"></i><input type="password" id="regPassword" placeholder="Password" required></label>
+
+        <button type="submit" class="cinematic-submit-btn">Buat akun</button>
+        <p class="cinematic-switch">Sudah punya akun? <button id="to-login-btn" class="cinematic-link-btn cinematic-accent">Masuk</button></p>
       </form>
     </section>
   </main>
+
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <script type="module" src="assets/js/pages/login.js"></script>
+  <script>
+    const toggle = document.getElementById('toggle-password');
+    const pass = document.getElementById('loginPassword');
+    if (toggle && pass) {
+      toggle.addEventListener('click', () => {
+        const shown = pass.type === 'text';
+        pass.type = shown ? 'password' : 'text';
+        toggle.innerHTML = shown ? '<i class="ri-eye-fill"></i>' : '<i class="ri-eye-off-fill"></i>';
+      });
+    }
+    const title = document.getElementById('auth-card-title');
+    const subtitle = document.getElementById('auth-card-subtitle');
+    document.getElementById('to-register-btn')?.addEventListener('click', () => {
+      title.textContent = 'Bikin akun';
+      subtitle.textContent = 'Isi data singkat, langsung masuk lobby.';
+    });
+    document.getElementById('to-login-btn')?.addEventListener('click', () => {
+      title.textContent = 'Siap tanding?';
+      subtitle.textContent = 'Masuk dulu, lanjut ke lobby.';
+    });
+  </script>
 </body>
 </html>
