@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="assets/css/style.css" />
     <link rel="stylesheet" href="assets/css/watermark.css" />
   <link rel="stylesheet" href="assets/css/register-agreement.css" />
+  <link rel="stylesheet" href="assets/css/register-info-popups.css" />
+  <link rel="stylesheet" href="assets/css/register-agreement-gate.css" />
 <script defer src="assets/js/core/page-transitions.js"></script>
 </head>
 <body class="elite-page elite-login-page cinematic-auth-page">
@@ -118,55 +120,82 @@
 </div>
 
   <script src="assets/js/register-agreement.js"></script>
+<script src="assets/js/register-info-popups.js"></script>
 
-<section class="register-agreement-overlay" id="registerAgreementOverlay" aria-modal="true" role="dialog" aria-labelledby="registerAgreementTitle">
-  <div class="register-agreement-card">
-    <div class="agreement-badge">Info Pendaftaran</div>
-    <h2 id="registerAgreementTitle">Baca dulu sebelum daftar</h2>
-    <p class="agreement-lead">
-      Sistem Icikiwir memakai email khusus turnamen dan nomor WhatsApp agar koordinasi match lebih aman, jelas, dan tidak menimbulkan salah paham.
-    </p>
+<div class="field-info-modal" id="fieldInfoModal" aria-hidden="true">
+  <div class="field-info-backdrop" data-close-field-info></div>
+  <div class="field-info-card" role="dialog" aria-modal="true" aria-labelledby="fieldInfoTitle">
+    <button class="field-info-close" type="button" data-close-field-info aria-label="Tutup">×</button>
+    <div class="field-info-icon">!</div>
+    <h3 id="fieldInfoTitle">Info</h3>
+    <p id="fieldInfoText"></p>
+  </div>
+</div>
 
-    <div class="agreement-points">
-      <article>
-        <span>01</span>
+  <script src="assets/js/register-agreement-gate.js"></script>
+
+<section class="icw-agreement-gate" id="icwAgreementGate" aria-hidden="true">
+  <div class="icw-agreement-backdrop" data-icw-agreement-close></div>
+
+  <div class="icw-agreement-panel" role="dialog" aria-modal="true" aria-labelledby="icwAgreementTitle">
+    <button class="icw-agreement-close" type="button" data-icw-agreement-close aria-label="Tutup agreement">×</button>
+
+    <div class="icw-agreement-head">
+      <span class="icw-agreement-kicker">Verifikasi Pendaftaran</span>
+      <h2 id="icwAgreementTitle">Agreement sebelum daftar</h2>
+      <p>
+        Sebelum lanjut ke form pendaftaran, baca dulu aturan singkat ini agar proses turnamen lebih aman,
+        jelas, dan tidak menimbulkan salah paham antar player maupun admin.
+      </p>
+    </div>
+
+    <div class="icw-agreement-body">
+      <article class="icw-agreement-item">
+        <div class="icw-agreement-number">01</div>
         <div>
-          <h3>Gunakan email @icikiwir.digital</h3>
+          <h3>Wajib pakai email turnamen</h3>
           <p>
-            Jangan memakai Gmail/Yahoo pribadi. Email <b>@icikiwir.digital</b> hanya dipakai sebagai identitas akun turnamen agar website tidak terlihat seperti meminta atau menyimpan email pribadi player.
+            Peserta wajib memakai email dengan domain <b>@icikiwir.digital</b>, bukan Gmail/Yahoo/email pribadi.
+            Tujuannya agar tidak ada salah paham seolah website meminta, mencuri, atau menyimpan email asli player.
+            Email ini hanya dipakai sebagai identitas akun di sistem turnamen Icikiwir.
           </p>
         </div>
       </article>
 
-      <article>
-        <span>02</span>
+      <article class="icw-agreement-item">
+        <div class="icw-agreement-number">02</div>
         <div>
-          <h3>Nomor WhatsApp untuk koordinasi match</h3>
+          <h3>Nomor HP/WhatsApp untuk koordinasi match</h3>
           <p>
-            Nomor HP/WA dipakai agar player atau team lawan bisa berkabar, membuat room, mengatur waktu match, dan konfirmasi hasil pertandingan.
+            Nomor HP/WhatsApp dipakai untuk koordinasi pertandingan, seperti membuat room, mengatur jadwal,
+            konfirmasi hasil match, dan memudahkan player/team lawan saling berkabar.
           </p>
         </div>
       </article>
 
-      <article>
-        <span>03</span>
+      <article class="icw-agreement-item">
+        <div class="icw-agreement-number">03</div>
         <div>
-          <h3>Admin hanya input hasil pertandingan</h3>
+          <h3>Admin hanya validasi dan input score</h3>
           <p>
-            Setelah kedua player/team selesai match, admin tinggal validasi dan mengisi score menang/kalah berdasarkan info dari peserta.
+            Setelah match selesai, admin cukup menerima info dari kedua team/player lalu menginput score
+            menang/kalah. Dengan begitu proses turnamen lebih cepat, rapi, dan minim perdebatan.
           </p>
         </div>
       </article>
     </div>
 
-    <label class="agreement-check">
-      <input type="checkbox" id="registerAgreementCheck">
-      <span>Saya paham dan setuju memakai email <b>@icikiwir.digital</b> serta nomor WhatsApp untuk kebutuhan koordinasi turnamen.</span>
+    <label class="icw-agreement-check">
+      <input type="checkbox" id="icwAgreementCheckbox">
+      <span>
+        Saya sudah membaca dan setuju menggunakan email <b>@icikiwir.digital</b> serta nomor WhatsApp
+        untuk kebutuhan koordinasi turnamen.
+      </span>
     </label>
 
-    <div class="agreement-actions">
-      <button type="button" class="agreement-btn ghost" id="agreementBackBtn">Kembali</button>
-      <button type="button" class="agreement-btn primary" id="agreementContinueBtn" disabled>Lanjut daftar</button>
+    <div class="icw-agreement-actions">
+      <button type="button" class="icw-agreement-btn secondary" data-icw-agreement-close>Kembali</button>
+      <button type="button" class="icw-agreement-btn primary" id="icwAgreementVerify" disabled>Verifikasi</button>
     </div>
   </div>
 </section>
