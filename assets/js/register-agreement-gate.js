@@ -33,6 +33,12 @@
       gate.classList.add('is-open');
       gate.setAttribute('aria-hidden', 'false');
       document.body.classList.add('icw-modal-lock');
+
+      const scrollArea = gate.querySelector('.icw-agreement-body');
+      const panel = gate.querySelector('.icw-agreement-panel');
+      if(scrollArea) scrollArea.scrollTop = 0;
+      if(panel) panel.scrollTop = 0;
+
       setTimeout(() => checkbox.focus({ preventScroll:true }), 80);
     }
 

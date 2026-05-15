@@ -6,7 +6,10 @@
   display:none;
   place-items:center;
   padding:22px;
+  padding-top:max(22px, env(safe-area-inset-top));
+  padding-bottom:max(22px, env(safe-area-inset-bottom));
 }
+
 
 .icw-agreement-gate.is-open{
   display:grid;
@@ -27,8 +30,11 @@
 .icw-agreement-panel{
   position:relative;
   width:min(800px, 100%);
-  max-height:calc(100vh - 44px);
-  overflow:auto;
+  max-height:calc(100dvh - 44px);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
   border-radius:30px;
   padding:30px;
   color:#fff;
@@ -95,6 +101,11 @@
   display:grid;
   gap:12px;
   margin:24px 0;
+  overflow:auto;
+  min-height:0;
+  padding-right:4px;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
 }
 
 .icw-agreement-item{
@@ -146,7 +157,9 @@
   font-size:13px;
   line-height:1.65;
   cursor:pointer;
+  flex:0 0 auto;
 }
+
 
 .icw-agreement-check input{
   width:19px;
@@ -161,7 +174,9 @@
   justify-content:flex-end;
   gap:10px;
   margin-top:18px;
+  flex:0 0 auto;
 }
+
 
 .icw-agreement-btn{
   border:0;
@@ -211,37 +226,119 @@ body.icw-modal-lock{
 
 @media(max-width:640px){
   .icw-agreement-gate{
-    padding:14px;
-    align-items:end;
+    padding:10px;
+    padding-top:max(10px, env(safe-area-inset-top));
+    padding-bottom:max(10px, env(safe-area-inset-bottom));
+    align-items:center;
   }
 
   .icw-agreement-panel{
-    max-height:calc(100vh - 28px);
-    border-radius:26px;
-    padding:22px;
+    width:100%;
+    max-height:calc(100dvh - 20px);
+    max-height:calc(100svh - 20px);
+    border-radius:22px;
+    padding:18px;
   }
 
   .icw-agreement-close{
-    top:12px;
-    right:12px;
+    top:10px;
+    right:10px;
+    width:34px;
+    height:34px;
+    font-size:22px;
+  }
+
+  .icw-agreement-kicker{
+    font-size:10px;
+    padding:6px 10px;
+    max-width:calc(100% - 44px);
+  }
+
+  .icw-agreement-head h2{
+    margin:12px 38px 6px 0;
+    font-size:clamp(23px, 8vw, 31px);
+    line-height:1.05;
+  }
+
+  .icw-agreement-head p{
+    font-size:12.5px;
+    line-height:1.55;
+  }
+
+  .icw-agreement-body{
+    gap:10px;
+    margin:14px 0;
+    padding-right:2px;
   }
 
   .icw-agreement-item{
     grid-template-columns:1fr;
-    padding:15px;
+    gap:10px;
+    padding:13px;
+    border-radius:18px;
   }
 
   .icw-agreement-number{
-    width:34px;
-    height:34px;
+    width:32px;
+    height:32px;
+    border-radius:12px;
+  }
+
+  .icw-agreement-item h3{
+    font-size:13.5px;
+    margin-bottom:4px;
+  }
+
+  .icw-agreement-item p{
+    font-size:12px;
+    line-height:1.55;
+  }
+
+  .icw-agreement-check{
+    gap:10px;
+    padding:12px;
+    border-radius:16px;
+    font-size:12px;
+    line-height:1.45;
+  }
+
+  .icw-agreement-check input{
+    width:18px;
+    height:18px;
   }
 
   .icw-agreement-actions{
     display:grid;
     grid-template-columns:1fr;
+    gap:8px;
+    margin-top:10px;
   }
 
   .icw-agreement-btn{
     width:100%;
+    padding:11px 16px;
+  }
+}
+
+@media(max-width:380px), (max-height:680px){
+  .icw-agreement-panel{
+    padding:14px;
+    border-radius:20px;
+  }
+
+  .icw-agreement-head h2{
+    font-size:22px;
+  }
+
+  .icw-agreement-head p{
+    font-size:12px;
+  }
+
+  .icw-agreement-body{
+    margin:10px 0;
+  }
+
+  .icw-agreement-item{
+    padding:11px;
   }
 }
