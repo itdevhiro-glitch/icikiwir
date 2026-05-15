@@ -88,14 +88,7 @@
     inset 0 1px 0 rgba(255,255,255,.35);
 }
 
-.hiro-dot::before{
-  content:"H";
-  font-size:12px;
-  line-height:1;
-  font-weight:900;
-  letter-spacing:-.4px;
-  color:#fff;
-}
+
 
 .hiro-text{
   display:flex;
@@ -148,9 +141,7 @@
     flex-basis:23px;
   }
 
-  .hiro-dot::before{
-    font-size:11px;
-  }
+  
 
   .hiro-text{
     font-size:12px;
@@ -159,5 +150,34 @@
   .hiro-text::before{
     font-size:7px;
     letter-spacing:1.15px;
+  }
+}
+
+
+/* FINAL FIX: hiro-dot is now the uploaded creator image, not text H */
+.hiro-dot{
+  width:32px !important;
+  height:32px !important;
+  flex:0 0 32px !important;
+  border-radius:999px !important;
+  object-fit:cover !important;
+  display:block !important;
+  background:none !important;
+  background-image:none !important;
+  color:transparent !important;
+  box-shadow:
+    0 0 18px rgba(96,165,250,.45),
+    inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+.hiro-dot::before,
+.hiro-dot::after{
+  content:none !important;
+  display:none !important;
+}
+@media(max-width:768px){
+  .hiro-dot{
+    width:28px !important;
+    height:28px !important;
+    flex-basis:28px !important;
   }
 }
