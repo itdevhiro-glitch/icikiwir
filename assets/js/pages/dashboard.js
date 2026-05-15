@@ -22,7 +22,7 @@ window.showSection = function(sectionId, btn) {
   $$('.nav-btn').forEach(el => el.classList.remove('active'));
   if (btn) btn.classList.add('active');
 };
-window.handleLogout = async function() { cleanupListeners(); await auth.signOut(); window.location.href = 'login.html'; };
+window.handleLogout = async function() { cleanupListeners(); await auth.signOut(); window.smoothNavigate ? window.smoothNavigate('login.html') : (window.location.href = 'login.html'); };
 window.copyWA = async function(value = '') {
   const wa = normalizeWhatsApp(value);
   if (!wa) return toast('Nomor WhatsApp belum tersedia.', 'danger');
@@ -44,10 +44,10 @@ function renderProfileForm() {
 }
 
 auth.onAuthStateChanged(async user => {
-  if (!user) return (window.location.href = 'login.html');
-  if (user.uid === ADMIN_UID) return (window.location.href = 'admin.html');
+  if (!user) return (window.smoothNavigate ? window.smoothNavigate('login.html') : (window.location.href = 'login.html'));
+  if (user.uid === ADMIN_UID) return (window.smoothNavigate ? window.smoothNavigate('admin.html') : (window.location.href = 'admin.html'));
   const result = await getAccountByUID(user.uid);
-  if (!result) { toast('Data akun tidak ditemukan.', 'danger'); await auth.signOut(); return (window.location.href = 'login.html'); }
+  if (!result) { toast('Data akun tidak ditemukan.', 'danger'); await auth.signOut(); return (window.smoothNavigate ? window.smoothNavigate('login.html') : (window.location.href = 'login.html')); }
   currentKey = result.key; currentType = result.type; initDashboard();
 });
 

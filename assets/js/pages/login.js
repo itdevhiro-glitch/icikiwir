@@ -14,12 +14,44 @@ function showAuthMessage(message, type = 'danger') {
 
 auth.onAuthStateChanged(user => {
   if (!user) return;
-  window.location.href = user.uid === ADMIN_UID ? 'admin.html' : 'dashboard.html';
+  window.smoothNavigate ? window.smoothNavigate(user.uid === ADMIN_UID ? 'admin.html' : 'dashboard.html') : (window.location.href = user.uid === ADMIN_UID ? 'admin.html' : 'dashboard.html');
 });
 
+function swapAuthPanel(fromForm, toForm) {
+  if (!fromForm || !toForm || fromForm === toForm) return;
+
+  const panel = fromForm.closest('.cinematic-auth-panel') || fromForm.parentElement;
+  if (panel) panel.style.minHeight = `${panel.offsetHeight}px`;
+
+  fromForm.classList.remove('auth-panel-ready', 'auth-panel-entering');
+  fromForm.classList.add('auth-panel-leaving');
+
+  window.setTimeout(() => {
+    fromForm.classList.add('hidden');
+    fromForm.classList.remove('auth-panel-leaving');
+
+    toForm.classList.remove('hidden', 'auth-panel-ready');
+    toForm.classList.add('auth-panel-entering');
+
+    if (panel) {
+      const nextHeight = panel.scrollHeight;
+      panel.style.minHeight = `${nextHeight}px`;
+    }
+
+    requestAnimationFrame(() => {
+      toForm.classList.remove('auth-panel-entering');
+      toForm.classList.add('auth-panel-ready');
+    });
+
+    window.setTimeout(() => {
+      toForm.classList.remove('auth-panel-ready');
+      if (panel) panel.style.minHeight = '';
+    }, 430);
+  }, 220);
+}
+
 function showRegisterPanel() {
-  loginForm.classList.add('hidden');
-  registerForm.classList.remove('hidden');
+  swapAuthPanel(loginForm, registerForm);
   showAuthMessage('');
 }
 $('#to-register-btn').addEventListener('click', event => {
@@ -33,8 +65,7 @@ if (location.hash === '#register' || sessionStorage.getItem('openRegister') === 
 
 $('#to-login-btn').addEventListener('click', event => {
   event.preventDefault();
-  registerForm.classList.add('hidden');
-  loginForm.classList.remove('hidden');
+  swapAuthPanel(registerForm, loginForm);
   showAuthMessage('');
 });
 
@@ -90,8 +121,7 @@ registerForm.addEventListener('submit', async event => {
     toast('Registrasi berhasil. Silakan login ulang.', 'success');
     await auth.signOut();
     registerForm.reset();
-    registerForm.classList.add('hidden');
-    loginForm.classList.remove('hidden');
+    swapAuthPanel(registerForm, loginForm);
     showAuthMessage('Registration successful. Please login.', 'success');
   } catch (error) {
     showAuthMessage(error.message);

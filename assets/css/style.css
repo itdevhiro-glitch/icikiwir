@@ -1866,3 +1866,213 @@ body.cinematic-index-page{
   .leaderboard-tabs{display:grid;grid-template-columns:1fr;}
   .solo-roster-actions{grid-template-columns:1fr!important;}
 }
+
+/* =========================================================
+   CLEAN PAGE TRANSITIONS ONLY
+   Fokus: perpindahan page + panel auth yang smooth.
+   Tidak ada cursor glow, particle, lighting, atau efek tambahan.
+   ========================================================= */
+html.page-transition-ready body{
+  opacity:0;
+  transform:translateY(10px);
+  filter:blur(2px);
+}
+html.page-transition-ready.page-transition-in body{
+  opacity:1;
+  transform:translateY(0);
+  filter:blur(0);
+  transition:opacity .32s ease, transform .32s ease, filter .32s ease;
+}
+html.page-transition-ready.page-transition-out body{
+  opacity:0;
+  transform:translateY(-8px);
+  filter:blur(2px);
+  transition:opacity .22s ease, transform .22s ease, filter .22s ease;
+}
+.cinematic-form,
+#dashboard-section,
+#leaderboard-section,
+#bracket-section,
+#profile-section,
+#admin-dashboard-section,
+#admin-teams-section,
+#tournament-control-section{
+  opacity:1;
+  transform:translateY(0);
+  transition:opacity .24s ease, transform .24s ease;
+}
+.hidden.cinematic-form,
+#dashboard-section.hidden,
+#leaderboard-section.hidden,
+#bracket-section.hidden,
+#profile-section.hidden,
+#admin-dashboard-section.hidden,
+#admin-teams-section.hidden,
+#tournament-control-section.hidden{
+  display:none!important;
+}
+.auth-panel-leaving{
+  opacity:0!important;
+  transform:translateY(8px)!important;
+}
+.auth-panel-entering{
+  opacity:0!important;
+  transform:translateY(-8px)!important;
+}
+.modal-overlay:not(.hidden){
+  animation:modalFadeIn .18s ease both;
+}
+.modal-overlay:not(.hidden) .modal-content{
+  animation:modalContentIn .22s ease both;
+}
+@keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes modalContentIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media (prefers-reduced-motion: reduce){
+  html.page-transition-ready body,
+  html.page-transition-ready.page-transition-in body,
+  html.page-transition-ready.page-transition-out body,
+  .cinematic-form,
+  .modal-overlay:not(.hidden),
+  .modal-overlay:not(.hidden) .modal-content{
+    transition:none!important;
+    animation:none!important;
+    transform:none!important;
+    filter:none!important;
+  }
+}
+
+/* =========================================================
+   V16 — SYNCHRONIZED PAGE TRANSITIONS ONLY
+   Fokus hanya transisi perpindahan page/panel.
+   Fix: background, blur overlay, dan konten bergerak satu timing.
+   ========================================================= */
+:root{
+  --page-ease:cubic-bezier(.22,1,.36,1);
+  --page-ease-out:cubic-bezier(.4,0,.2,1);
+  --page-in:.58s;
+  --page-out:.34s;
+}
+
+/* Jangan blur/transform seluruh body karena background fixed jadi kaku. */
+html.page-transition-ready body,
+html.page-transition-ready.page-transition-in body,
+html.page-transition-ready.page-transition-out body{
+  opacity:1!important;
+  transform:none!important;
+  filter:none!important;
+  transition:none!important;
+}
+
+/* Background overlay ikut napas pelan, bukan ikut ke-drag oleh body. */
+html.page-transition-ready body::before,
+html.page-transition-ready body::after{
+  will-change:opacity, transform, filter;
+  transform:scale(1.018);
+  filter:blur(10px);
+  opacity:.55;
+  transition:
+    opacity var(--page-in) var(--page-ease),
+    transform var(--page-in) var(--page-ease),
+    filter var(--page-in) var(--page-ease);
+}
+html.page-transition-ready.page-transition-in body::before,
+html.page-transition-ready.page-transition-in body::after{
+  transform:scale(1);
+  filter:blur(0);
+  opacity:1;
+}
+html.page-transition-ready.page-transition-out body::before,
+html.page-transition-ready.page-transition-out body::after{
+  transform:scale(1.012);
+  filter:blur(7px);
+  opacity:.68;
+  transition:
+    opacity var(--page-out) var(--page-ease-out),
+    transform var(--page-out) var(--page-ease-out),
+    filter var(--page-out) var(--page-ease-out);
+}
+
+/* Konten page fade + slide halus, tidak mengganggu background. */
+html.page-transition-ready .cinematic-auth-shell,
+html.page-transition-ready .cinematic-index-shell,
+html.page-transition-ready .landing-shell,
+html.page-transition-ready .app-layout,
+html.page-transition-ready .auth-shell{
+  opacity:0;
+  transform:translate3d(0,16px,0) scale(.992);
+  filter:blur(7px);
+  will-change:opacity, transform, filter;
+}
+html.page-transition-ready.page-transition-in .cinematic-auth-shell,
+html.page-transition-ready.page-transition-in .cinematic-index-shell,
+html.page-transition-ready.page-transition-in .landing-shell,
+html.page-transition-ready.page-transition-in .app-layout,
+html.page-transition-ready.page-transition-in .auth-shell{
+  opacity:1;
+  transform:translate3d(0,0,0) scale(1);
+  filter:blur(0);
+  transition:
+    opacity var(--page-in) var(--page-ease),
+    transform var(--page-in) var(--page-ease),
+    filter var(--page-in) var(--page-ease);
+}
+html.page-transition-ready.page-transition-out .cinematic-auth-shell,
+html.page-transition-ready.page-transition-out .cinematic-index-shell,
+html.page-transition-ready.page-transition-out .landing-shell,
+html.page-transition-ready.page-transition-out .app-layout,
+html.page-transition-ready.page-transition-out .auth-shell{
+  opacity:0;
+  transform:translate3d(0,-10px,0) scale(.996);
+  filter:blur(5px);
+  transition:
+    opacity var(--page-out) var(--page-ease-out),
+    transform var(--page-out) var(--page-ease-out),
+    filter var(--page-out) var(--page-ease-out);
+}
+
+/* Login/register: panel height ikut transisi, jadi tidak patah saat register lebih tinggi. */
+.cinematic-auth-panel{
+  transition:min-height .42s var(--page-ease), filter .42s var(--page-ease)!important;
+}
+.cinematic-form{
+  transform-origin:center top;
+  transition:
+    opacity .32s var(--page-ease),
+    transform .32s var(--page-ease),
+    filter .32s var(--page-ease)!important;
+}
+.auth-panel-leaving{
+  opacity:0!important;
+  transform:translate3d(0,10px,0) scale(.985)!important;
+  filter:blur(5px)!important;
+  pointer-events:none!important;
+}
+.auth-panel-entering{
+  opacity:0!important;
+  transform:translate3d(0,-10px,0) scale(.985)!important;
+  filter:blur(5px)!important;
+  pointer-events:none!important;
+}
+.auth-panel-ready{
+  opacity:1!important;
+  transform:translate3d(0,0,0) scale(1)!important;
+  filter:blur(0)!important;
+}
+
+@media (prefers-reduced-motion: reduce){
+  html.page-transition-ready body::before,
+  html.page-transition-ready body::after,
+  html.page-transition-ready .cinematic-auth-shell,
+  html.page-transition-ready .cinematic-index-shell,
+  html.page-transition-ready .landing-shell,
+  html.page-transition-ready .app-layout,
+  html.page-transition-ready .auth-shell,
+  .cinematic-auth-panel,
+  .cinematic-form{
+    opacity:1!important;
+    transform:none!important;
+    filter:none!important;
+    transition:none!important;
+    animation:none!important;
+  }
+}
