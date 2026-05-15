@@ -12,6 +12,23 @@ function showAuthMessage(message, type = 'danger') {
   authStatus.className = `auth-message auth-${type}`;
 }
 
+const regEmailInput = $('#regEmail');
+if (regEmailInput) {
+  regEmailInput.addEventListener('input', () => {
+    const value = regEmailInput.value.trim().toLowerCase();
+    regEmailInput.value = value;
+    if (!value) {
+      regEmailInput.setCustomValidity('');
+      return;
+    }
+    if (value.includes('@') && !value.endsWith('@icikiwir.digital')) {
+      regEmailInput.setCustomValidity('Gunakan email turnamen @icikiwir.digital, bukan Gmail/email pribadi.');
+    } else {
+      regEmailInput.setCustomValidity('');
+    }
+  });
+}
+
 auth.onAuthStateChanged(user => {
   if (!user) return;
   window.smoothNavigate ? window.smoothNavigate(user.uid === ADMIN_UID ? 'admin.html' : 'dashboard.html') : (window.location.href = user.uid === ADMIN_UID ? 'admin.html' : 'dashboard.html');
@@ -106,9 +123,9 @@ registerForm.addEventListener('submit', async event => {
     const wa = normalizeWhatsApp($('#regWhatsapp').value.trim());
 
     if (!/^[a-z0-9._-]{3,24}$/.test(username)) throw new Error('Username hanya boleh huruf kecil, angka, titik, underscore, dash. Minimal 3 karakter.');
-    if (!email.endsWith('@icikiwir.digital')) throw new Error('Email harus menggunakan domain @icikiwir.digital.');
+    if (!email.endsWith('@icikiwir.digital')) throw new Error('Email pribadi seperti Gmail/Yahoo tidak diperbolehkan. Gunakan email turnamen dengan domain @icikiwir.digital, contoh: nickname@icikiwir.digital.');
     if (password.length < 6) throw new Error('Password minimal 6 karakter.');
-    if (!/^62\d{8,15}$/.test(wa)) throw new Error('Nomor WhatsApp wajib benar. Contoh: 08123456789.');
+    if (!/^62\d{8,15}$/.test(wa)) throw new Error('Nomor WhatsApp wajib benar karena dipakai untuk koordinasi room, jadwal match, dan konfirmasi hasil. Contoh: 08123456789.');
     if (await getAccountByUsername(username)) throw new Error('Username sudah dipakai.');
 
     const cred = await auth.createUserWithEmailAndPassword(email, password);

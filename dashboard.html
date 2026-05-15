@@ -6,7 +6,8 @@
   <title>Dashboard - Icikiwir Esports</title>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css" />
-  <script defer src="assets/js/core/page-transitions.js"></script>
+    <link rel="stylesheet" href="assets/css/watermark.css" />
+<script defer src="assets/js/core/page-transitions.js"></script>
 </head>
 <body class="dashboard-page pro-v10">
   <div class="app-layout v10-dashboard-layout">
@@ -75,5 +76,24 @@
   <div id="team-join-modal" class="modal-overlay hidden"><div class="modal-content"><div class="modal-header"><h2>Join Team 5v5</h2><button class="close-btn" onclick="closeModal('team-join-modal')">&times;</button></div><p id="teamJoinHint">Pilih player yang join.</p><div id="teamJoinPlayers" class="check-list"></div><button class="btn success" style="margin-top:14px;width:100%" onclick="confirmTeamRegistration()">Confirm Team Lineup</button></div></div>
   <div id="brawl-modal" class="modal-overlay hidden"><div class="modal-content"><div class="modal-header"><h2>Join 1 vs 1 Brawl</h2><button class="close-btn" onclick="closeModal('brawl-modal')">&times;</button></div><p>Pilih satu player untuk masuk bracket.</p><select id="brawlPlayer"></select><button class="btn brawl" style="margin-top:14px;width:100%" onclick="confirmBrawlRegistration()">Confirm Player</button></div></div>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script><script type="module" src="assets/js/pages/dashboard.js"></script>
+
+
+
+
+<div class="hiro-watermark">
+    <div class="hiro-watermark-glow"></div>
+    <a href="https://www.instagram.com/hiro.esc/" target="_blank">
+        <span class="hiro-label">Developed by</span>
+        <span class="hiro-name">@hiro.esc</span>
+    </a>
+</div>
+
+<div class="hiro-signature" aria-label="Developer Instagram">
+  <a href="https://www.instagram.com/hiro.esc/" target="_blank" rel="noopener noreferrer">
+    <span class="hiro-dot" aria-hidden="true"></span>
+    <span class="hiro-text">hiro.esc</span>
+  </a>
+</div>
+
 </body>
 </html>

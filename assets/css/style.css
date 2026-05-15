@@ -2160,3 +2160,48 @@ body.dashboard-page.pro-v10::after{opacity:.28!important;mask-image:linear-gradi
 @media(prefers-reduced-motion:reduce){
   html.page-transition-ready *, .dashboard-section-panel, .dashboard-page .tournament-card, .dashboard-page .player-card, .dashboard-page .contact-card, .dashboard-page .match-card, .dashboard-page .btn, .dashboard-page .nav-btn{transition:none!important;animation:none!important;transform:none!important;filter:none!important;will-change:auto!important}
 }
+
+/* Register clarity: domain Icikiwir + WA purpose */
+.field-help{
+  margin:-7px 2px 3px;
+  display:flex;
+  align-items:flex-start;
+  gap:7px;
+  color:rgba(255,255,255,.86);
+  font-size:.78rem;
+  line-height:1.45;
+  text-shadow:0 6px 16px rgba(0,0,0,.35);
+}
+.field-help i{
+  flex:0 0 auto;
+  margin-top:2px;
+  color:#93c5fd;
+}
+.field-help b{color:#fff;font-weight:900;}
+.register-info-box{
+  display:grid;
+  gap:8px;
+  padding:12px;
+  border-radius:12px;
+  background:rgba(15,23,42,.58);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 18px 38px rgba(2,8,23,.24);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.register-info-box div{display:grid;gap:3px;}
+.register-info-box strong{
+  color:#fff;
+  font-size:.83rem;
+  letter-spacing:-.01em;
+}
+.register-info-box span{
+  color:rgba(226,232,240,.84);
+  font-size:.76rem;
+  line-height:1.45;
+}
+@media (max-width:560px){
+  .field-help{font-size:.74rem;}
+  .register-info-box{padding:10px;border-radius:10px;}
+  .register-info-box span{font-size:.73rem;}
+}
