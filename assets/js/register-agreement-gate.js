@@ -6,6 +6,22 @@
 
   ready(function(){
     const gate = document.getElementById('icwAgreementGate');
+
+    function syncModalViewport(){
+      const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      if(viewportHeight){
+        document.documentElement.style.setProperty('--icw-modal-vh', viewportHeight + 'px');
+        const gateEl = document.getElementById('icwAgreementGate');
+        if(gateEl) gateEl.style.setProperty('--icw-modal-vh', viewportHeight + 'px');
+      }
+    }
+
+    syncModalViewport();
+    window.addEventListener('resize', syncModalViewport, { passive:true });
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', syncModalViewport, { passive:true });
+      window.visualViewport.addEventListener('scroll', syncModalViewport, { passive:true });
+    }
     const checkbox = document.getElementById('icwAgreementCheckbox');
     const verifyBtn = document.getElementById('icwAgreementVerify');
     if(!gate || !checkbox || !verifyBtn) return;
@@ -30,6 +46,7 @@
       afterVerify = typeof callback === 'function' ? callback : null;
       checkbox.checked = false;
       verifyBtn.disabled = true;
+      syncModalViewport();
       gate.classList.add('is-open');
       gate.setAttribute('aria-hidden', 'false');
       document.body.classList.add('icw-modal-lock');

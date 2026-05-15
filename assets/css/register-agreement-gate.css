@@ -5,6 +5,7 @@
   z-index:1000001;
   display:none;
   place-items:center;
+  --icw-mobile-browser-gap: 0px;
   padding:22px;
   padding-top:max(22px, env(safe-area-inset-top));
   padding-bottom:max(22px, env(safe-area-inset-bottom));
@@ -30,7 +31,7 @@
 .icw-agreement-panel{
   position:relative;
   width:min(800px, 100%);
-  max-height:calc(100dvh - 44px);
+  max-height:calc(var(--icw-modal-vh, 100dvh) - 44px - var(--icw-mobile-browser-gap, 0px));
   overflow:hidden;
   display:flex;
   flex-direction:column;
@@ -226,18 +227,19 @@ body.icw-modal-lock{
 
 @media(max-width:640px){
   .icw-agreement-gate{
+    --icw-mobile-browser-gap: 72px;
     padding:10px;
     padding-top:max(10px, env(safe-area-inset-top));
-    padding-bottom:max(10px, env(safe-area-inset-bottom));
-    align-items:center;
+    padding-bottom:calc(max(12px, env(safe-area-inset-bottom)) + var(--icw-mobile-browser-gap));
+    align-items:start;
   }
 
   .icw-agreement-panel{
     width:100%;
-    max-height:calc(100dvh - 20px);
-    max-height:calc(100svh - 20px);
+    max-height:calc(var(--icw-modal-vh, 100svh) - 22px - var(--icw-mobile-browser-gap));
+    min-height:0;
     border-radius:22px;
-    padding:18px;
+    padding:16px;
   }
 
   .icw-agreement-close{
@@ -267,7 +269,7 @@ body.icw-modal-lock{
 
   .icw-agreement-body{
     gap:10px;
-    margin:14px 0;
+    margin:12px 0;
     padding-right:2px;
   }
 
@@ -311,7 +313,7 @@ body.icw-modal-lock{
     display:grid;
     grid-template-columns:1fr;
     gap:8px;
-    margin-top:10px;
+    margin-top:8px;
   }
 
   .icw-agreement-btn{
@@ -321,6 +323,9 @@ body.icw-modal-lock{
 }
 
 @media(max-width:380px), (max-height:680px){
+  .icw-agreement-gate{
+    --icw-mobile-browser-gap: 82px;
+  }
   .icw-agreement-panel{
     padding:14px;
     border-radius:20px;
