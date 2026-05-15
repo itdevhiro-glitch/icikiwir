@@ -152,3 +152,8 @@ small:has(+ .icw-field-info-btn){
     font-size:11px;
   }
 }
+
+/* Final clean register form: helper text is moved into the ! popup. */
+.field-help{
+  display:none !important;
+}

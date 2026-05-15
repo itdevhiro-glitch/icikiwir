@@ -6,6 +6,7 @@ import { ADMIN_UID } from '../core/firebase.js';
 const loginForm = $('#login-form');
 const registerForm = $('#register-form');
 const authStatus = $('#auth-status-message');
+let suppressAutoRedirect = false;
 
 function showAuthMessage(message, type = 'danger') {
   authStatus.textContent = message || '';
@@ -30,7 +31,7 @@ if (regEmailInput) {
 }
 
 auth.onAuthStateChanged(user => {
-  if (!user) return;
+  if (!user || suppressAutoRedirect) return;
   window.smoothNavigate ? window.smoothNavigate(user.uid === ADMIN_UID ? 'admin.html' : 'dashboard.html') : (window.location.href = user.uid === ADMIN_UID ? 'admin.html' : 'dashboard.html');
 });
 
@@ -73,6 +74,12 @@ function showRegisterPanel() {
 }
 $('#to-register-btn').addEventListener('click', event => {
   event.preventDefault();
+  const openGate = window.icwAgreementGate?.open;
+  const verified = window.icwAgreementGate?.isVerified?.() === true;
+  if (openGate && !verified) {
+    openGate(event.currentTarget, showRegisterPanel);
+    return;
+  }
   showRegisterPanel();
 });
 if (location.hash === '#register' || sessionStorage.getItem('openRegister') === '1') {
@@ -103,6 +110,7 @@ loginForm.addEventListener('submit', async event => {
     if (account.data.isBanned) throw new Error('Akun ini sedang dibanned.');
     await auth.signInWithEmailAndPassword(account.data.email, password);
   } catch (error) {
+    suppressAutoRedirect = false;
     showAuthMessage(error.message);
   } finally {
     setButtonLoading(button, false);
@@ -128,6 +136,7 @@ registerForm.addEventListener('submit', async event => {
     if (!/^62\d{8,15}$/.test(wa)) throw new Error('Nomor WhatsApp wajib benar karena dipakai untuk koordinasi room, jadwal match, dan konfirmasi hasil. Contoh: 08123456789.');
     if (await getAccountByUsername(username)) throw new Error('Username sudah dipakai.');
 
+    suppressAutoRedirect = true;
     const cred = await auth.createUserWithEmailAndPassword(email, password);
     const common = { uid: cred.user.uid, username, email, whatsapp: wa, accountType, isApproved: accountType === 'user', isBanned: false, stats: makeDefaultStats(), createdAt: firebase.database.ServerValue.TIMESTAMP };
     if (accountType === 'team') {
@@ -137,10 +146,13 @@ registerForm.addEventListener('submit', async event => {
     }
     toast('Registrasi berhasil. Silakan login ulang.', 'success');
     await auth.signOut();
+    suppressAutoRedirect = false;
     registerForm.reset();
+    window.icwAgreementGate?.reset?.();
     swapAuthPanel(registerForm, loginForm);
     showAuthMessage('Registration successful. Please login.', 'success');
   } catch (error) {
+    suppressAutoRedirect = false;
     showAuthMessage(error.message);
   } finally {
     setButtonLoading(button, false);

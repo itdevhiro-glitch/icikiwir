@@ -42,7 +42,7 @@
         <button type="submit" class="cinematic-submit-btn">Masuk</button>
         <button type="button" class="cinematic-link-btn auth-forgot">Lupa password?</button>
 
-        <p class="cinematic-switch">Belum punya akun? <button id="to-register-btn" class="cinematic-link-btn cinematic-accent">Daftar</button></p>
+        <p class="cinematic-switch">Belum punya akun? <button type="button" id="to-register-btn" class="cinematic-link-btn cinematic-accent">Daftar</button></p>
       </form>
 
       <form id="register-form" class="cinematic-form hidden">
@@ -70,7 +70,7 @@
         <label class="cinematic-field"><i class="ri-lock-password-line"></i><input type="password" id="regPassword" placeholder="Password" required></label>
 
         <button type="submit" class="cinematic-submit-btn">Buat akun</button>
-        <p class="cinematic-switch">Sudah punya akun? <button id="to-login-btn" class="cinematic-link-btn cinematic-accent">Masuk</button></p>
+        <p class="cinematic-switch">Sudah punya akun? <button type="button" id="to-login-btn" class="cinematic-link-btn cinematic-accent">Masuk</button></p>
       </form>
     </section>
   </main>
@@ -107,8 +107,8 @@
 <div class="hiro-watermark">
     <div class="hiro-watermark-glow"></div>
     <a href="https://www.instagram.com/hiro.esc/" target="_blank">
-        <span class="hiro-label">Developed by</span>
-        <span class="hiro-name">@hiro.esc</span>
+        
+        <span class="hiro-name"></span>
     </a>
 </div>
 
@@ -119,9 +119,6 @@
   </a>
 </div>
 
-  <script src="assets/js/register-agreement.js"></script>
-<script src="assets/js/register-info-popups.js"></script>
-
 <div class="field-info-modal" id="fieldInfoModal" aria-hidden="true">
   <div class="field-info-backdrop" data-close-field-info></div>
   <div class="field-info-card" role="dialog" aria-modal="true" aria-labelledby="fieldInfoTitle">
@@ -131,8 +128,6 @@
     <p id="fieldInfoText"></p>
   </div>
 </div>
-
-  <script src="assets/js/register-agreement-gate.js"></script>
 
 <section class="icw-agreement-gate" id="icwAgreementGate" aria-hidden="true">
   <div class="icw-agreement-backdrop" data-icw-agreement-close></div>
@@ -199,6 +194,10 @@
     </div>
   </div>
 </section>
+
+  <script src="assets/js/register-agreement.js"></script>
+  <script src="assets/js/register-info-popups.js"></script>
+  <script src="assets/js/register-agreement-gate.js"></script>
 
 </body>
 </html>
