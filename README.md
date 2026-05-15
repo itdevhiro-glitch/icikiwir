@@ -32,13 +32,5 @@ icikiwir-esports-pro/
 ├─ database.rules.json
 └─ docs/CHANGELOG.md
 ```
-
-## Cara pakai
-1. Upload semua file ke hosting static seperti GitHub Pages, Netlify, Vercel static, atau Firebase Hosting.
-2. Pastikan Firebase Auth Email/Password aktif.
-3. Pastikan Realtime Database aktif.
-4. Sesuaikan `ADMIN_UID` di `assets/js/core/firebase.js` jika akun admin berubah.
-5. Terapkan rules Firebase yang aman sebelum public.
-
 ## Catatan penting security
 Firebase API key memang boleh ada di frontend, tetapi database wajib diamankan dengan Firebase Rules. Jangan gunakan `.read: true` dan `.write: true` untuk production.
