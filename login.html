@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css" />
     <link rel="stylesheet" href="assets/css/watermark.css" />
+  <link rel="stylesheet" href="assets/css/register-agreement.css" />
 <script defer src="assets/js/core/page-transitions.js"></script>
 </head>
 <body class="elite-page elite-login-page cinematic-auth-page">
@@ -115,6 +116,60 @@
     <span class="hiro-text">hiro.esc</span>
   </a>
 </div>
+
+  <script src="assets/js/register-agreement.js"></script>
+
+<section class="register-agreement-overlay" id="registerAgreementOverlay" aria-modal="true" role="dialog" aria-labelledby="registerAgreementTitle">
+  <div class="register-agreement-card">
+    <div class="agreement-badge">Info Pendaftaran</div>
+    <h2 id="registerAgreementTitle">Baca dulu sebelum daftar</h2>
+    <p class="agreement-lead">
+      Sistem Icikiwir memakai email khusus turnamen dan nomor WhatsApp agar koordinasi match lebih aman, jelas, dan tidak menimbulkan salah paham.
+    </p>
+
+    <div class="agreement-points">
+      <article>
+        <span>01</span>
+        <div>
+          <h3>Gunakan email @icikiwir.digital</h3>
+          <p>
+            Jangan memakai Gmail/Yahoo pribadi. Email <b>@icikiwir.digital</b> hanya dipakai sebagai identitas akun turnamen agar website tidak terlihat seperti meminta atau menyimpan email pribadi player.
+          </p>
+        </div>
+      </article>
+
+      <article>
+        <span>02</span>
+        <div>
+          <h3>Nomor WhatsApp untuk koordinasi match</h3>
+          <p>
+            Nomor HP/WA dipakai agar player atau team lawan bisa berkabar, membuat room, mengatur waktu match, dan konfirmasi hasil pertandingan.
+          </p>
+        </div>
+      </article>
+
+      <article>
+        <span>03</span>
+        <div>
+          <h3>Admin hanya input hasil pertandingan</h3>
+          <p>
+            Setelah kedua player/team selesai match, admin tinggal validasi dan mengisi score menang/kalah berdasarkan info dari peserta.
+          </p>
+        </div>
+      </article>
+    </div>
+
+    <label class="agreement-check">
+      <input type="checkbox" id="registerAgreementCheck">
+      <span>Saya paham dan setuju memakai email <b>@icikiwir.digital</b> serta nomor WhatsApp untuk kebutuhan koordinasi turnamen.</span>
+    </label>
+
+    <div class="agreement-actions">
+      <button type="button" class="agreement-btn ghost" id="agreementBackBtn">Kembali</button>
+      <button type="button" class="agreement-btn primary" id="agreementContinueBtn" disabled>Lanjut daftar</button>
+    </div>
+  </div>
+</section>
 
 </body>
 </html>
